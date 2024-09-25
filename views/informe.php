@@ -237,26 +237,38 @@
 
                 var date = dateTime ? new Date(dateTime).getTime() : null;
 
+                // Obtener los valores de los filtros de área y rol
+                var areaFilter = $('#areaFilter').val();
+                var roleFilter = $('#roleFilter').val();
+                var area = data[6]; // Índice de la columna de área
+                var rol = data[5]; // Índice de la columna de rol
+
+                // Comprobación de filtros de área
+                var areaMatch = areaFilter ? area === areaFilter : true;
+                // Comprobación de filtros de rol
+                var roleMatch = roleFilter ? rol === roleFilter : true;
+
                 if ($('#enableDateFilter').is(':checked')) {
                     // Filtro por rango de fechas
                     var minDateTime = minDate ? new Date(minDate + 'T' + (minTime || '00:00')).getTime() : null;
                     var maxDateTime = maxDate ? new Date(maxDate + 'T' + (maxTime || '23:59')).getTime() : null;
 
-                    if (date >= minDateTime && date <= maxDateTime) {
+                    if (date >= minDateTime && date <= maxDateTime && areaMatch && roleMatch) {
                         return true;
                     }
                     return false;
                 } else {
                     // Filtro por fecha única
                     if (singleDateTime) {
-                        if (date >= singleDateTime && date < singleDateTime + 24 * 60 * 60 * 1000) {
+                        if (date >= singleDateTime && date < singleDateTime + 24 * 60 * 60 * 1000 && areaMatch && roleMatch) {
                             return true;
                         }
                         return false;
                     }
-                    return true;
+                    return areaMatch && roleMatch; // Si no hay filtros de fecha, solo chequea área y rol
                 }
             });
+
 
             // Generar PDF
             $('#exportPDF').click(function () {
