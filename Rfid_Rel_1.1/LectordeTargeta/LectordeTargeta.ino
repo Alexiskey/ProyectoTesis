@@ -2,16 +2,14 @@
 #include <MFRC522.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include "../config.h"
 
 #define SS_PIN 5
 #define RST_PIN 22
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
-// Configuración de WiFi
-const char* ssid = "Red Alexis";          // Cambia esto por tu SSID
-const char* password = "Alexis123#";      // Cambia esto por tu contraseña WiFi
-const char* serverUrl = "http://192.168.1.4/Rfid_registros/includes/leerTargeta.php"; // Cambia la URL según tu IP
+// Placa NodeMCU-32S
 
 void setup() {
   // Inicializar monitor serie
