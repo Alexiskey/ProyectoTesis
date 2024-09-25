@@ -48,8 +48,8 @@
                         <td><?php echo $fila['idAreas']; ?></td>
                         <td><?php echo $fila['nombreArea']; ?></td>
                         <td>
-                        <a class="btn btn-warning" href="editar_area.php?idAreas=<?php echo $fila['idAreas']?> "> Editar </a>
-                        <a class="btn btn-danger" href="eliminar_area.php?idAreas=<?php echo $fila['idAreas']; ?>">Eliminar</a>
+                        <a class="btn btn-warning" href="../includes/editar_area.php?idAreas=<?php echo $fila['idAreas']?> "> Editar </a>
+                        <a class="btn btn-danger" href="../includes/eliminar_area.php?idAreas=<?php echo $fila['idAreas']; ?>">Eliminar</a>
                         </td>  
                     </tr>
                 <?php
