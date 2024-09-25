@@ -9,7 +9,7 @@ if(isset($_POST['Ingresar'])){
     $area = trim($_POST['Area']);
 
     $consulta = "INSERT INTO accesos_logs (idAccesoLog, idUsuario, idArea, tipoAcesso)
-    VALUES (NULL, (SELECT idUsuario FROM usuario WHERE TagNFC = '$TagEmpleado'), '$area', 'Entrada');";
+    VALUES (NULL, (SELECT idUsuario FROM usuario WHERE TagRFID = '$TagEmpleado'), '$area', 'Entrada');";
 
     mysqli_query($conexion, $consulta);
     mysqli_close($conexion);

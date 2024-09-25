@@ -12,7 +12,7 @@ $Area = $_GET['Area'];
 
 // Insertar en la base de datos
 $sql = "INSERT INTO accesos_logs (idAccesoLog, idUsuario, idArea, tipoAcesso)
-VALUES (NULL, (SELECT idUsuario FROM usuario WHERE tagNFC = '$uid'), '$Area', 'Entrada');";
+VALUES (NULL, (SELECT idUsuario FROM usuario WHERE TagRFID = '$uid'), '$Area', 'Entrada');";
 
 if ($conn->query($sql) === TRUE) {
     

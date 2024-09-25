@@ -16,19 +16,37 @@ $usuario = mysqli_fetch_assoc($resultado);
     <title>Editar usuario</title>
     <link rel="stylesheet" href="../css/fontawesome-all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .input-group {
+            display: flex; /* Utiliza flexbox para alinear horizontalmente */
+            align-items: center; /* Centra verticalmente los elementos */
+        }
+        .input-group input {
+            flex: 1; /* Hace que el input ocupe el espacio disponible */
+            margin-right: 10px; /* Espacio entre el input y el botón */
+        }
+    </style>
 </head>
 
 <body id="page-top">
 
-<form action="../includes/_functions.php" method="POST">
+<form action="_functions.php" method="POST">
     <div id="login">
         <div class="container">
             <div id="login-row" class="row justify-content-center align-items-center">
                 <div id="login-column" class="col-md-6">
                     <div id="login-box" class="col-md-12">
                         <br>
-                        <br>
                         <h3 class="text-center">Editar usuario</h3>
+                        <div class="form-group">
+                            <label for="idUsuario" class="form-label">id Usuario: <?php echo $idUsuario; ?></label>
+                            <input type="hidden" name="accion" value="editar_registro"> 
+                            <input type="hidden" id="idUsuario" name="idUsuario" class="form-control" readonly value="<?php echo $idUsuario; ?>">
+
+                        </div>
 
                         <div class="form-group">
                             <label for="NombreUsuario" class="form-label">Nombre *</label>
@@ -40,8 +58,8 @@ $usuario = mysqli_fetch_assoc($resultado);
                         </div>
 
                         <div class="form-group">
-                            <label for="Apellido2Usuario" class="form-label">Apellido Materno *</label>
-                            <input type="text" id="Apellido2Usuario" name="Apellido2Usuario" class="form-control" value="<?php echo $usuario['Apellido2Usuario']; ?>" required>
+                            <label for="Apellido2Usuario" class="form-label">Apellido Materno</label>
+                            <input type="text" id="Apellido2Usuario" name="Apellido2Usuario" class="form-control" value="<?php echo $usuario['Apellido2Usuario']; ?>" >
                         </div>
 
                         <div class="form-group">
@@ -50,22 +68,42 @@ $usuario = mysqli_fetch_assoc($resultado);
                         </div>
 
                         <div class="form-group">
-                            <label for="idRol" class="form-label">idRol*</label>
-                            <input type="text" id="idRol" name="idRol" class="form-control" value="<?php echo $usuario['idRol']; ?>" required>
+                            <label for="rol" class="form-label">Rol de Empleado *</label>
+                            <select id="rol" name="rol" class="form-control" required>
+                                <?php
+                                    $conexion = mysqli_connect("localhost", "root", "", "ingresos_rfid");
+                                    if (!$conexion) {
+                                        die("Error de conexión: " . mysqli_connect_error());
+                                    }
+                                    // Consulta para obtener los IDs y nombres de los roles
+                                    $SQL = "SELECT roles.idRol, roles.nombreRol 
+                                            FROM roles"; // Obtener id y nombre de los roles
+                                    $roles = mysqli_query($conexion, $SQL);
+
+                                    if ($roles->num_rows > 0) {
+                                        while ($rolrow = mysqli_fetch_assoc($roles)) {
+                                            $selected = ($rolrow['idRol'] == $usuario['idRol']) ? 'selected' : '';
+                                            echo '<option value="' . $rolrow['idRol'] . '" ' . $selected . '>' . $rolrow['nombreRol'] . '</option>';
+                                        
+                                        }
+                                    }
+                                ?>
+                            </select>
+
+                        </div>  
+                        <div class="form-group">
+                            <label for="TagRFID" class="form-label">TagRFID *</label>
+                            <div class="input-group">
+                                <input type="text" id="TagRFID" name="TagRFID" class="form-control" readonly value="<?php echo $usuario['TagRFID']; ?>"> 
+                                <button type="button" id="toggleReading" class="btn btn-info">Activar Lectura</button>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="tagNFC" class="form-label">TagNFC *</label>
-                            <input type="text" id="tagNFC" name="tagNFC" class="form-control" value="<?php echo $usuario['tagNFC']; ?>" required>
-                            <input type="hidden" name="accion" value="editar_registro">
-                            <input type="hidden" name="idUsuario" value="<?php echo $idUsuario ;?>">
-                        </div>
-                        
                         <br>
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-success">Editar</button>
-                            <a href="./user.php" class="btn btn-danger">Cancelar</a>
+                            <a href="../views/user.php" class="btn btn-danger">Cancelar</a>
                         </div>
                     </div>
                 </div>
@@ -75,24 +113,55 @@ $usuario = mysqli_fetch_assoc($resultado);
 </form>
 
 <script>
+    let lecturaActiva = false; // Flag para controlar el estado de la lectura
+    let intervaloLectura; // Variable para almacenar el intervalo
+
     function formatRut(input) {
-        // Remove all non-digit characters
-        let value = input.value.replace(/\D/g, '');
+        let value = input.value.replace(/[^0-9kK]/g, ''); // Elimina caracteres no numéricos
+
+        // Separa los primeros 8 dígitos y el dígito verificador
+        const primerosNumeros = value.slice(0, 8); // Primeros 8 números
+        const ultimoNumero = value.slice(8); // Último número
         
-        // Apply the RUT format (xx.xxx.xxx-x)
-        if (value.length > 1) {
-            // Insert dots every 3 digits, except the last 2 digits
-            value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-        }
+        // Aplica el formato xx.xxx.xxx
+        const formattedRut = primerosNumeros.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); // Agrega puntos cada 3 dígitos
         
-        // Insert the dash before the last digit
-        if (value.length > 1) {
-            value = value.replace(/(\d+)(\d{1})$/, '$1-$2');
-        }
-        
-        // Set the formatted value to the input
-        input.value = value;
+        // Combina los números formateados con el dígito verificador
+        input.value = `${formattedRut}${ultimoNumero ? '-' + ultimoNumero : ''}`; 
     }
+
+    // Función para actualizar el TagRFID
+    function actualizarTagRFID() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'lecturaTxt.php', true); // Cambia la ruta según sea necesario
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const primeraLinea = xhr.responseText.trim(); // Obtiene la primera línea
+                document.getElementById('TagRFID').value = primeraLinea; // Actualiza el campo TagRFID
+            } else {
+                console.error("Error al leer el archivo: " + xhr.status);
+            }
+        };
+        xhr.send();
+    }
+
+    // Función para activar/desactivar la lectura
+    document.getElementById('toggleReading').onclick = function() {
+        lecturaActiva = !lecturaActiva; // Cambia el estado de la lectura
+        this.textContent = lecturaActiva ? 'Desactivar Lectura' : 'Activar Lectura'; // Cambia el texto del botón
+
+        if (lecturaActiva) {
+            // Iniciar la lectura
+            intervaloLectura = setInterval(actualizarTagRFID, 2000); // Actualiza cada 2 segundos
+        } else {
+            // Detener la lectura
+            clearInterval(intervaloLectura);
+            // Enviar una solicitud POST para actualizar el contenido de lectura.txt
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "lecturaTxt.php", true); // Llama al archivo lecturaTxt.php
+            xhr.send();
+        }
+    };
 </script>
 
 </body>

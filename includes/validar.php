@@ -13,9 +13,9 @@ if(isset($_POST['registrar'])){
       $rol = trim($_POST['rol']);
       $TagRFID = trim($_POST['TagRFID']);
 
-      $consulta = "INSERT INTO `usuario` ( `NombreUsuario`, `Apellido1Usuario`, `Apellido2Usuario`, `idRol`, `tagNFC`, `rut`) 
+      $consulta = "INSERT INTO `usuario` ( `NombreUsuario`, `Apellido1Usuario`, `Apellido2Usuario`, `idRol`, `TagRFID`, `rut`) 
       VALUES ( '$NombreUsuario', '$Apellido1Usuario', '$Apellido1Usuario', '$rol', '$TagRFID', '$Rut')";
-      #$consulta =  "INSERT INTO `usuario` (`idUsuario`, `NombreUsuario`, `Apellido1Usuario`, `Apellido2Usuario`, `idRol`, `tagNFC`, `status`) 
+      #$consulta =  "INSERT INTO `usuario` (`idUsuario`, `NombreUsuario`, `Apellido1Usuario`, `Apellido2Usuario`, `idRol`, `TagRFID`, `status`) 
       #VALUES (NULL, 'Valentina', 'Vega', NULL, '3', '7736346', NULL)";
       mysqli_query($conexion, $consulta);
       mysqli_close($conexion);

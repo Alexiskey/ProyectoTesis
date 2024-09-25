@@ -39,7 +39,7 @@
               <th>Apellido1</th>
               <th>Apellido2</th>
               <th>Rut</th>
-              <th>tagNFC</th>
+              <th>TagRFID</th>
               <th>idRol</th>
               <th>status</th>
               <th>acciones</th>
@@ -49,7 +49,7 @@
         
         <?php
           $conexion=mysqli_connect("localhost","root","","ingresos_rfid");               
-          $SQL="SELECT usuario.idUsuario, usuario.NombreUsuario, usuario.Apellido1Usuario, usuario.rut, usuario.Apellido2Usuario, usuario.tagNFC, usuario.status, roles.nombreRol 
+          $SQL="SELECT usuario.idUsuario, usuario.NombreUsuario, usuario.Apellido1Usuario, usuario.rut, usuario.Apellido2Usuario, usuario.TagRFID, usuario.status, roles.nombreRol 
                 FROM usuario
                 LEFT JOIN roles ON usuario.idRol = roles.idRol";
           $dato = mysqli_query($conexion, $SQL);
@@ -63,7 +63,7 @@
               <td><?php echo $fila['Apellido1Usuario']; ?></td>
               <td><?php echo $fila['Apellido2Usuario']; ?></td>
               <td><?php echo $fila['rut']; ?></td>
-              <td><?php echo $fila['tagNFC']; ?></td>
+              <td><?php echo $fila['TagRFID']; ?></td>
               <td><?php echo $fila['nombreRol']; ?></td>
               <td><?php echo $fila['status']; ?></td>				
               <td>

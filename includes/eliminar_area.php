@@ -23,7 +23,8 @@
                 <input type="hidden" name="accion" value="eliminar_area">
                 <input type="hidden" name="idAreas" value="<?php echo $_GET['idAreas']; ?>">
                 <input type="submit" name="" value="Eliminar" class= "btn btn-danger">
-                <a href="adminAreas.php" class="btn btn-success">Cancelar</a>                     
+                <a href="../views/adminAreas.php" class="btn btn-success">Cancelar</a>      
+            </form>               
         </div>
     </div>
 

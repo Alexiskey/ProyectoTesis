@@ -34,8 +34,10 @@ function editar_registro() {
     $conexion=mysqli_connect("localhost","root","","ingresos_rfid");
     extract($_POST);
     $consulta="UPDATE usuario SET NombreUsuario = '$NombreUsuario', Apellido1Usuario = '$Apellido1Usuario', Apellido2Usuario = '$Apellido2Usuario' , 
-    rut = '$rut' , idRol = '$idRol' , tagNFC = '$tagNFC'  WHERE idUsuario = '$idUsuario' ";
+    rut = '$rut' , idRol = '$rol' , TagRFID = '$TagRFID' 
+    WHERE idUsuario = '$idUsuario'";
     mysqli_query($conexion, $consulta);
+    //echo $consulta;
     header('Location: ../views/user.php');
 }
 
@@ -98,7 +100,7 @@ function acceso_user() {
     }
 
   
-}
+} 
 ?>
 
 

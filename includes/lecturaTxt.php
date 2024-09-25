@@ -2,7 +2,6 @@
 // Este bloque manejará las solicitudes GET para leer la primera línea de lectura.txt
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $file = 'lectura.txt'; // Asegúrate de que la ruta sea correcta
-
     if (file_exists($file)) {
         // Leer la primera línea del archivo
         $linea = fgets(fopen($file, "r")); // Abre el archivo en modo lectura
