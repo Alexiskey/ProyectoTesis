@@ -9,7 +9,12 @@
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
+const char* serverUrl = "http://192.168.1.4/RegistroTracking/includes/ingresorfid.php";
+
+// Placa NodeMCU-32S
+
 const String Area = "2";  // Sala de Reuniones 1
+
 void setup() {
   // Inicializar monitor serie
   Serial.begin(115200);

@@ -6,9 +6,14 @@
 
 #define SS_PIN 5
 #define RST_PIN 22
+#define LED_VERDE 12 
+#define LED_ROJO  14 
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
+const char* serverUrl = "http://192.168.1.4/RegistroTracking/includes/ingresorfid.php";
+
+// Placa NodeMCU-32S
 
 const String Area = "1";  // Comedor 1
 
@@ -16,6 +21,10 @@ void setup() {
   // Inicializar monitor serie
   Serial.begin(115200);
   delay(100);
+
+  pinMode(LED_VERDE, OUTPUT);
+
+  pinMode(LED_ROJO, OUTPUT);
 
   // Inicializar el lector RFID
   SPI.begin();           
@@ -42,7 +51,8 @@ void setup() {
 
 void loop() {
   delay(100);
-
+  digitalWrite(LED_VERDE, 0); 
+  digitalWrite(LED_ROJO, 0);
   // Verificar si hay una nueva tarjeta presente
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
     Serial.println("Tarjeta Leída");
@@ -69,8 +79,32 @@ void loop() {
     Serial.println(serverUrl);
     Serial.println(datos_a_enviar);
     Serial.println(codigo_respuesta);
-    Serial.print("uid= "); Serial.println(payload);
+    Serial.println(payload);
 
-    rfid.PICC_HaltA();
+    int lastIndex = payload.lastIndexOf('\n');
+        if (lastIndex != -1) { // Si hay al menos una línea
+            int ultimaIndex = payload.lastIndexOf('\n', lastIndex - 1); // Buscar la penúltima línea
+            String ultimaLinea;
+            if (ultimaIndex != -1) {
+                ultimaLinea = payload.substring(ultimaIndex + 1, lastIndex); // Extraer la penúltima línea
+            } else {
+                ultimaLinea = payload.substring(0, lastIndex); // Si no hay penúltima línea, usa desde el inicio hasta el último salto de línea
+            }
+
+            if (ultimaLinea == "Acceso permitido al área") {
+              Serial.println(ultimaLinea);
+              digitalWrite(LED_VERDE, 1);
+              delay(1000); 
+              digitalWrite(LED_VERDE, 0);    
+            } else {
+              Serial.println(ultimaLinea);
+              digitalWrite(LED_ROJO, 1); 
+              delay(1000);
+              digitalWrite(LED_ROJO, 0);     
+            }
+        } else {
+            Serial.println("No se encontraron resultados");
+        }
+
   }
 }

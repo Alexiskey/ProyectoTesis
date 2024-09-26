@@ -7,6 +7,8 @@
 #define SS_PIN 5
 #define RST_PIN 22
 
+const char* serverUrl = "http://192.168.1.4/RegistroTracking/includes/leerTargeta.php";
+
 MFRC522 rfid(SS_PIN, RST_PIN);
 
 // Placa NodeMCU-32S
