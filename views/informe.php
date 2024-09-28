@@ -58,10 +58,8 @@
                 <select id="areaFilter">
                     <option value="">Seleccione un área</option>
                     <?php
-                    $conexion = mysqli_connect("localhost", "root", "", "ingresos_rfid");
-                    if (!$conexion) {
-                        die("Error de conexión: " . mysqli_connect_error());
-                    }
+                    require_once("../includes/_db.php"); 
+                    global $conexion; 
                     $areaSQL = "SELECT nombreArea FROM areas";
                     $areasResult = mysqli_query($conexion, $areaSQL);
 

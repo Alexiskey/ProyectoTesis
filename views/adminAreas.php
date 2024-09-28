@@ -35,7 +35,8 @@
             </thead>
             <tbody>
                 <?php
-                $conexion = mysqli_connect("localhost", "root", "", "ingresos_rfid");
+                require_once("../includes/_db.php"); 
+                global $conexion; 
                 $SQL = "SELECT * FROM areas";
                 $dato = mysqli_query($conexion, $SQL);
 

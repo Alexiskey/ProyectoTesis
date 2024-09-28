@@ -46,7 +46,8 @@
         <tbody>
         
         <?php
-          $conexion=mysqli_connect("localhost","root","","ingresos_rfid");               
+          require_once("../includes/_db.php"); 
+          global $conexion;               
           $SQL="SELECT usuario.idUsuario, usuario.NombreUsuario, usuario.Apellido1Usuario, usuario.rut, usuario.Apellido2Usuario, usuario.TagRFID, usuario.status, roles.nombreRol 
                 FROM usuario
                 LEFT JOIN roles ON usuario.idRol = roles.idRol";

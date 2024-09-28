@@ -24,7 +24,7 @@
 
 <body id="page-top">
 
-<form action="../../includes/validar.php" method="POST">
+<form action="../../includes/_functions.php" method="POST">
 
 <div class="container is-fluid">
         <br> 
@@ -56,10 +56,9 @@
                                 <label for="rol" class="form-label">Rol de Empleado *</label>
                                 <select id="rol" name="rol" class="form-control" required>
                                     <?php
-                                        $conexion = mysqli_connect("localhost", "root", "", "ingresos_rfid");
-                                        if (!$conexion) {
-                                            die("Error de conexión: " . mysqli_connect_error());
-                                        }
+                                        require_once("../../includes/_db.php"); 
+                                        global $conexion;
+                                        
                                         // Consulta para obtener los IDs y nombres de los roles
                                         $SQL = "SELECT roles.idRol, roles.nombreRol 
                                                 FROM roles"; // Obtener id y nombre de los roles
@@ -88,6 +87,7 @@
                             <br>
 
                             <div class="mb-3">
+                                <input type="hidden" name="accion" value="registrarUsuario">
                                 <input type="submit" value="Guardar" class="btn btn-success" name="registrar">
                                 <a href="../adminUser.php" class="btn btn-danger">Cancelar</a>
                             </div>
@@ -120,7 +120,7 @@
     // Función para actualizar el TagRFID
     function actualizarTagRFID() {
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', '../includes/lecturaTxt.php', true); // Cambia la ruta según sea necesario
+        xhr.open('GET', '../../includes/lecturaTxt.php', true); // Cambia la ruta según sea necesario
         xhr.onload = function() {
             if (xhr.status === 200) {
                 const primeraLinea = xhr.responseText.trim(); // Obtiene la primera línea
@@ -145,7 +145,7 @@
             clearInterval(intervaloLectura);
             // Enviar una solicitud POST para actualizar el contenido de lectura.txt
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../includes/lecturaTxt.php", true); // Llama al archivo lecturaTxt.php
+            xhr.open("POST", "../../includes/lecturaTxt.php", true); // Llama al archivo lecturaTxt.php
             xhr.send();
         }
     };

@@ -1,8 +1,7 @@
 <?php
-// Este bloque PHP manejará las solicitudes POST desde AJAX
+require_once("_db.php"); 
+global $conexion; 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $conexion = mysqli_connect("localhost", "root", "", "ingresos_rfid");
-
     if (!$conexion) {
         die("Conexión fallida: " . mysqli_connect_error());
     }

@@ -29,6 +29,8 @@ El proyecto "Registro y Tracking con RFID" tiene como objetivo implementar un si
 ## Caracteristicas
 
  Los archivos PHP se encargan de la gestión del sistema desde el lado del servidor, permitiendo la administración y visualización de usuarios, áreas y la visualización de datos, mientras que los codigos arduino se encargan de la interacción con el hardware RFID, leyendo datos y enviándolos al servidor para su procesamiento.
+ 
+ El archivo _db.php
 
 ## Uso
 

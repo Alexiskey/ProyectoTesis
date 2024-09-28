@@ -1,6 +1,7 @@
 <?php
+require_once("../../includes/_db.php"); 
+global $conexion; 
 $idAreas = $_GET['idAreas'];
-$conexion = mysqli_connect("localhost", "root", "", "ingresos_rfid");
 $consulta = "SELECT * FROM areas WHERE idAreas = $idAreas ";
 $resultado = mysqli_query($conexion, $consulta);
 $area = mysqli_fetch_assoc($resultado);
