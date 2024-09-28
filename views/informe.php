@@ -47,9 +47,7 @@
     <div class="container is-fluid">
         <br>
         <div class="nav-buttons">
-            <button onclick="window.location.href='ingresoArea.php'" class="btn btn-success">Ingresos Area</button>
-            <button onclick="window.location.href='user.php'" class="btn btn-success">Usuarios</button>
-            <button onclick="window.location.href='registro.php'" class="btn btn-success">Registrar</button>
+            <button onclick="window.location.href='adminUser.php'" class="btn btn-success">Usuarios</button>
             <button onclick="window.location.href='adminAreas.php'" class="btn btn-success">Administrar Areas</button>
         </div>
 

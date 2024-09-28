@@ -30,8 +30,7 @@
         <!-- Contenedor para los botones de navegación -->
         <div class="nav-buttons">
             <button onclick="window.location.href='informe.php'" class="btn btn-success">Informes</button>
-            <button onclick="window.location.href='user.php'" class="btn btn-success">Usuarios</button>
-            <button onclick="window.location.href='registro.php'" class="btn btn-success">Registrar</button>
+            <button onclick="window.location.href='adminUser.php'" class="btn btn-success">Usuarios</button>
             <button onclick="window.location.href='adminAreas.php'" class="btn btn-success">Administrar Areas</button>
 
         </div>

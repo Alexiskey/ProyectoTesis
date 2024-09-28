@@ -14,8 +14,8 @@ $usuario = mysqli_fetch_assoc($resultado);
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar usuario</title>
-    <link rel="stylesheet" href="../css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../../css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../../css/styles.css">
     <style>
         .form-group {
             margin-bottom: 15px;
@@ -33,7 +33,7 @@ $usuario = mysqli_fetch_assoc($resultado);
 
 <body id="page-top">
 
-<form action="_functions.php" method="POST">
+<form action="../../includes/_functions.php" method="POST">
     <div id="login">
         <div class="container">
             <div id="login-row" class="row justify-content-center align-items-center">
@@ -103,7 +103,7 @@ $usuario = mysqli_fetch_assoc($resultado);
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-success">Editar</button>
-                            <a href="../views/user.php" class="btn btn-danger">Cancelar</a>
+                            <a href="../adminUser.php" class="btn btn-danger">Cancelar</a>
                         </div>
                     </div>
                 </div>

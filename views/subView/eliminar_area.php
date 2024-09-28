@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Usuarios</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Eliminar Area</title>
+    <link rel="stylesheet" href="../../css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../../css/styles.css">
 </head>
 <body>
     
@@ -19,11 +20,11 @@
 
     <div class="row">
         <div class="col-sm-6">
-            <form action="../includes/_functions.php" method="POST">
+            <form action="../../includes/_functions.php" method="POST">
                 <input type="hidden" name="accion" value="eliminar_area">
                 <input type="hidden" name="idAreas" value="<?php echo $_GET['idAreas']; ?>">
                 <input type="submit" name="" value="Eliminar" class= "btn btn-danger">
-                <a href="../views/adminAreas.php" class="btn btn-success">Cancelar</a>      
+                <a href="../adminAreas.php" class="btn btn-success">Cancelar</a>      
             </form>               
         </div>
     </div>

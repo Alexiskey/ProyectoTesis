@@ -33,12 +33,13 @@ El proyecto "Registro y Tracking con RFID" tiene como objetivo implementar un si
 ## Uso
 
 1. Al encender el sistema Apacche como base de datos Mysql, espera a que se inicialice.
-2. Al encender el sistema Arduino.
-3. Ingresar a la interfaz en <http://localhost/phpmyadmin/index.php>
-4. Navegar por la interfaz a donde desee ir.
-5. En las secciones que se requiera lectura de targeta se indicara en un boton selecionable, la opciond escaneo de targetas.
-6. Acerca una tarjeta RFID al lector.
-7. El sistema registrará automáticamente la tarjeta y mostrará información relevante en el seria Monitor de arduino, y ejecutara la accion correspondiente en la interfaz.
-8. Puedes consultar los registros en tiempo real dentro de la base de datos en <http://localhost/phpmyadmin/>.
+2. Configurar archivo `Rfid_Rel_1.1/config.h` con usuario y contraseña donde se ejecuta el servidor.
+3. Al encender el sistema Arduino.
+4. Ingresar a la interfaz en <http://localhost/phpmyadmin/index.php>
+5. Navegar por la interfaz a donde desee ir.
+6. En las secciones que se requiera lectura de targeta se indicara en un boton selecionable, la opciond escaneo de targetas.
+7. Acerca una tarjeta RFID al lector.
+8. El sistema registrará automáticamente la tarjeta y mostrará información relevante en el seria Monitor de arduino, y ejecutara la accion correspondiente en la interfaz.
+9. Puedes consultar los registros en tiempo real dentro de la base de datos en <http://localhost/phpmyadmin/>.
 
 

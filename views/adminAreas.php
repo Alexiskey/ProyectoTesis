@@ -15,15 +15,13 @@
     <!-- Contenedor para los botones de navegación -->
     <div class="nav-buttons">
         <button onclick="window.location.href='informe.php'" class="btn btn-success">Informes</button>
-        <button onclick="window.location.href='user.php'" class="btn btn-success">Usuarios</button>
-        <button onclick="window.location.href='ingresoArea.php'" class="btn btn-success">Ingresos Area</button>
-        <button onclick="window.location.href='registro.php'" class="btn btn-success">Registrar</button>
+        <button onclick="window.location.href='adminUser.php'" class="btn btn-success">Usuarios</button>
     </div>
     <br>
     <h1>Lista de Áreas</h1>
     <br>
     <div>
-        <a class="btn btn-success" href="./registrarArea.php">Nueva Área</a>
+        <a class="btn btn-success" href="./subView/registrarArea.php">Nueva Área</a>
     </div>
     <br>
     <div class="table-container">
@@ -48,8 +46,8 @@
                         <td><?php echo $fila['idAreas']; ?></td>
                         <td><?php echo $fila['nombreArea']; ?></td>
                         <td>
-                        <a class="btn btn-warning" href="../includes/editar_area.php?idAreas=<?php echo $fila['idAreas']?> "> Editar </a>
-                        <a class="btn btn-danger" href="../includes/eliminar_area.php?idAreas=<?php echo $fila['idAreas']; ?>">Eliminar</a>
+                        <a class="btn btn-warning" href="./subView/editar_area.php?idAreas=<?php echo $fila['idAreas']?> "> Editar </a>
+                        <a class="btn btn-danger" href="./subView/eliminar_area.php?idAreas=<?php echo $fila['idAreas']; ?>">Eliminar</a>
                         </td>  
                     </tr>
                 <?php

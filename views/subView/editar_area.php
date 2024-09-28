@@ -13,13 +13,13 @@ $area = mysqli_fetch_assoc($resultado);
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Area</title>
-    <link rel="stylesheet" href="../css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../../css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../../css/styles.css">
 </head>
 
 <body id="page-top">
 
-<form action="../includes/_functions.php" method="POST">
+<form action="../../includes/_functions.php" method="POST">
     <div id="login">
         <div class="container">
             <div id="login-row" class="row justify-content-center align-items-center">
@@ -40,7 +40,7 @@ $area = mysqli_fetch_assoc($resultado);
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-success">Editar</button>
-                            <a href="../views/adminAreas.php" class="btn btn-danger">Cancelar</a>
+                            <a href="../adminAreas.php" class="btn btn-danger">Cancelar</a>
                         </div>
                     </div>
                 </div>
