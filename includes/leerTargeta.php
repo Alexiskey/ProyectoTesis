@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             file_put_contents($file, $uid . PHP_EOL);
         }
 
-        echo $uid; 
+        echo $uid ."\n"; 
+        echo "Lectura existosa";
     } else {
         echo "Esperando lectura...";
     }

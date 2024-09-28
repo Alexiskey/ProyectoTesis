@@ -37,13 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (NULL, (SELECT idUsuario FROM usuario WHERE TagRFID = '$uid'), '$Area', 'Entrada');";
                 if ($conexion->query($sql) === TRUE) {
                     
-                    echo "Acceso permitido al área\n";
+                    echo "Acceso permitido al área";
                 } else {
                     echo "Error: " . $sql . "<br>" . $conn->error;
 }
                 
             } else {
-                echo "Acceso denegado al área.\n";
+                echo "Acceso denegado al área.";
             }
         } else {
             echo "No se encontraron resultados para el UID o el Área especificados.";

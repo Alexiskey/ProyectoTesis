@@ -6,6 +6,8 @@
 
 #define SS_PIN 5
 #define RST_PIN 22
+#define LED_VERDE 12 
+#define LED_ROJO  14 
 
 const char* serverUrl = "http://192.168.1.4/RegistroTracking/includes/leerTargeta.php";
 
@@ -14,9 +16,12 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 // Placa NodeMCU-32S
 
 void setup() {
-  // Inicializar monitor serie
   Serial.begin(115200);
+  Serial.print("\033[2J");
   delay(100);
+
+  pinMode(LED_VERDE, OUTPUT);
+  pinMode(LED_ROJO, OUTPUT);
 
   // Inicializar el lector RFID
   SPI.begin();           
@@ -42,8 +47,9 @@ void setup() {
 }
 
 void loop() {
-  delay(100);
-
+  delay(500);
+  digitalWrite(LED_VERDE, 0); 
+  digitalWrite(LED_ROJO, 0);
   // Verificar si hay una nueva tarjeta presente
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
     Serial.println("Tarjeta Leída");
@@ -71,35 +77,23 @@ void loop() {
     Serial.println(datos_a_enviar);
     Serial.println(codigo_respuesta);
     Serial.print("uid= "); Serial.println(payload);
-
-    /*
-    // Enviar el UID al servidor PHP si el UID no está vacío
-    if (WiFi.status() == WL_CONNECTED && !uidStr.isEmpty()) {
-      HTTPClient http;
-      String datos_a_enviar = "uid=" + uidStr;  // Cambié el formato de envío de datos
-
-      http.begin(serverUrl);
-      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-      int codigo_respuesta = http.POST(datos_a_enviar);
-
-      if (codigo_respuesta > 0) {
-        Serial.println("Código HTTP: " + String(codigo_respuesta));
-        if (codigo_respuesta == 200) {
-          String cuerpo_respuesta = http.getString();
-          Serial.println("El servidor respondió: ");
-          Serial.println(cuerpo_respuesta);
+    Serial.println("------------------------------------");
+    int lastIndex = payload.lastIndexOf('\n');
+    String ultimaLinea;
+    if (lastIndex != -1) {
+        ultimaLinea = payload.substring(lastIndex + 1); // Extraer la última línea
+        Serial.println("Última línea: " + ultimaLinea); 
+        if (ultimaLinea == "Lectura existosa") {
+            digitalWrite(LED_VERDE, 1); 
+            digitalWrite(LED_ROJO, 0);  
+        } else {
+            Serial.println(ultimaLinea);
+            digitalWrite(LED_VERDE, 0); 
+            digitalWrite(LED_ROJO, 1);  
         }
-      } else {
-        Serial.print("Error al enviar POST, Código: ");
-        Serial.println(codigo_respuesta);
-      }
-      http.end();
     } else {
-      Serial.println("No se pudo enviar el UID. Verifica la conexión WiFi.");
+        Serial.println("No se encontraron líneas en el payload.");
     }
-    */
-    // Detener la comunicación con la tarjeta
     rfid.PICC_HaltA();
   }
 }

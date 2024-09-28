@@ -18,8 +18,8 @@ const char* serverUrl = "http://192.168.1.4/RegistroTracking/includes/ingresorfi
 const String Area = "1";  // Comedor 1
 
 void setup() {
-  // Inicializar monitor serie
   Serial.begin(115200);
+  Serial.print("\033[2J");
   delay(100);
 
   pinMode(LED_VERDE, OUTPUT);
@@ -80,29 +80,21 @@ void loop() {
     Serial.println(datos_a_enviar);
     Serial.println(codigo_respuesta);
     Serial.println(payload);
-
+    Serial.println("------------------------------------");
     int lastIndex = payload.lastIndexOf('\n');
-        if (lastIndex != -1) { // Si hay al menos una línea
-            int ultimaIndex = payload.lastIndexOf('\n', lastIndex - 1); // Buscar la penúltima línea
-            String ultimaLinea;
-            if (ultimaIndex != -1) {
-                ultimaLinea = payload.substring(ultimaIndex + 1, lastIndex); // Extraer la penúltima línea
-            } else {
-                ultimaLinea = payload.substring(0, lastIndex); // Si no hay penúltima línea, usa desde el inicio hasta el último salto de línea
-            }
-
-            if (ultimaLinea == "Acceso permitido al área") {
-              Serial.println(ultimaLinea);
-              digitalWrite(LED_VERDE, 1);
-              delay(1000); 
-              digitalWrite(LED_VERDE, 0);    
-            } else {
-              Serial.println(ultimaLinea);
-              digitalWrite(LED_ROJO, 1); 
-              delay(1000);
-              digitalWrite(LED_ROJO, 0);     
-            }
+    String ultimaLinea;
+    if (lastIndex != -1) {
+        ultimaLinea = payload.substring(lastIndex + 1); // Extraer la última línea
+        Serial.println("Última línea: " + ultimaLinea); 
+        if (ultimaLinea == "Acceso permitido al área") {
+            digitalWrite(LED_VERDE, 1); 
+            digitalWrite(LED_ROJO, 0);  
         } else {
+            Serial.println(ultimaLinea);
+            digitalWrite(LED_VERDE, 0); 
+            digitalWrite(LED_ROJO, 1);  
+        }
+    } else {
             Serial.println("No se encontraron resultados");
         }
 
