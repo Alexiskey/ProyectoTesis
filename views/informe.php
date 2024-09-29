@@ -283,6 +283,8 @@ $('#exportPDF').click(function () {
 
         // Extraer solo la fecha (sin la hora)
         var date = dateTime.split(' ')[0];
+        // Extraer la hora
+        var time = dateTime.split(' ')[1];
 
         if (!userAreaDayCounts[date]) {
             userAreaDayCounts[date] = {};
@@ -299,11 +301,12 @@ $('#exportPDF').click(function () {
         }
 
         if (!userAreaDayCounts[date][userId].areaCount[area]) {
-            userAreaDayCounts[date][userId].areaCount[area] = 0;
+            userAreaDayCounts[date][userId].areaCount[area] = { count: 0, time: [] }; // Cambiar a objeto para almacenar la hora
         }
 
         // Incrementar el contador de ingresos por área en esa fecha
-        userAreaDayCounts[date][userId].areaCount[area]++;
+        userAreaDayCounts[date][userId].areaCount[area].count++;
+        userAreaDayCounts[date][userId].areaCount[area].time.push(time); // Agregar la hora
     });
 
     // Generar PDF
@@ -357,15 +360,16 @@ $('#exportPDF').click(function () {
         doc.setFontSize(12);
         finalY += marginY; // Añadir un margen vertical antes de cada título
         // Agregar título de la tabla para cada día
-        doc.text(`Hubo un total de ${totalIngresos} ingresos en el area ${area}.`, leftsize, finalY);
+        doc.text(`Hubo un total de ${totalIngresos} ingresos en el área ${area}.`, leftsize, finalY);
 
         // Crear cuerpo de la tabla por día
         var areaDayTableData = [];
         for (var userId in userAreaDayCounts[date]) {
             var user = userAreaDayCounts[date][userId];
             for (var area in user.areaCount) {
+                var areaData = user.areaCount[area];
                 areaDayTableData.push([
-                    user.id, user.name, user.lastName1, user.lastName2, area, date, user.areaCount[area]
+                    user.id, user.name, user.lastName1, user.lastName2, area, date, areaData.count, areaData.time.join(', ') // Agregar hora como un string separado por comas
                 ]);
             }
         }
@@ -373,7 +377,7 @@ $('#exportPDF').click(function () {
         // Agregar la tabla para ese día
         doc.autoTable({
             startY: finalY + marginY, // Añadir margen vertical antes de la tabla
-            head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos']],
+            head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
             body: areaDayTableData,
         });
 
@@ -395,6 +399,7 @@ $('#exportPDF').click(function () {
     // Guardar PDF
     doc.save('informe_ingresos.pdf');
 });
+
 
 
 
