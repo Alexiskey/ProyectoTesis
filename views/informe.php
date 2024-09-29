@@ -172,136 +172,171 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            var table = $('#table_id').DataTable({
-                "language": {
-                    "search": "Buscar en toda la tabla:",
-                    "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-                    "lengthMenu": "Mostrar _MENU_ entradas"
-                },
-                "order": [[7, 'desc']],
-                "columnDefs": [
-                    {
-                        "targets": 7,
-                        "render": function (data, type, row) {
-                            if (type === 'sort' || type === 'type') {
-                                var dateParts = data.split(' ');
-                                var dateArray = dateParts[0].split('-');
-                                var timeArray = dateParts[1].split(':');
-                                var formattedDate = new Date(
-                                    dateArray[0], // Año
-                                    dateArray[1] - 1, // Mes (0-11)
-                                    dateArray[2], // Día
-                                    timeArray[0], // Hora
-                                    timeArray[1] // Minutos
-                                ).getTime();
-                                return formattedDate;
+        <script>
+            $(document).ready(function () {
+                var table = $('#table_id').DataTable({
+                    "language": {
+                        "search": "Buscar en toda la tabla:",
+                        "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                        "lengthMenu": "Mostrar _MENU_ entradas"
+                    },
+                    "order": [[7, 'desc']],
+                    "columnDefs": [
+                        {
+                            "targets": 7,
+                            "render": function (data, type, row) {
+                                if (type === 'sort' || type === 'type') {
+                                    var dateParts = data.split(' ');
+                                    var dateArray = dateParts[0].split('-');
+                                    var timeArray = dateParts[1].split(':');
+                                    var formattedDate = new Date(
+                                        dateArray[0], // Año
+                                        dateArray[1] - 1, // Mes (0-11)
+                                        dateArray[2], // Día
+                                        timeArray[0], // Hora
+                                        timeArray[1] // Minutos
+                                    ).getTime();
+                                    return formattedDate;
+                                }
+                                return data;
                             }
-                            return data;
                         }
+                    ]
+                });
+
+                // Mostrar/ocultar filtros de fecha al hacer clic en la casilla
+                $('#enableDateFilter').change(function () {
+                    if ($(this).is(':checked')) {
+                        $('#dateFilters').show();
+                        $('#singleDayFilters').hide();
+                    } else {
+                        $('#dateFilters').hide();
+                        $('#singleDayFilters').show();
                     }
-                ]
-            });
+                });
 
-            // Mostrar/ocultar filtros de fecha al hacer clic en la casilla
-            $('#enableDateFilter').change(function () {
-                if ($(this).is(':checked')) {
-                    $('#dateFilters').show();
-                    $('#singleDayFilters').hide();
-                } else {
-                    $('#dateFilters').hide();
-                    $('#singleDayFilters').show();
-                }
-            });
+                // Filtro de búsqueda al hacer clic en el botón de filtro
+                $('#filterButton').on('click', function () {
+                    table.draw();
+                });
 
-            // Filtro de búsqueda al hacer clic en el botón de filtro
-            $('#filterButton').on('click', function () {
-                table.draw();
-            });
+                $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+                    var minDate = $('#startDate').val();
+                    var maxDate = $('#endDate').val();
+                    var minTime = $('#startTime').val();
+                    var maxTime = $('#endTime').val();
+                    var dateTime = data[7] || ''; // Índice de la columna de fecha
 
-            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-                var minDate = $('#startDate').val();
-                var maxDate = $('#endDate').val();
-                var minTime = $('#startTime').val();
-                var maxTime = $('#endTime').val();
-                var dateTime = data[7] || ''; // Índice de la columna de fecha
+                    var singleDate = $('#singleDate').val();
+                    var singleTime = $('#singleTime').val();
+                    var singleDateTime = singleDate ? new Date(singleDate + 'T' + (singleTime || '00:00')).getTime() : null;
 
-                var singleDate = $('#singleDate').val();
-                var singleTime = $('#singleTime').val();
-                var singleDateTime = singleDate ? new Date(singleDate + 'T' + (singleTime || '00:00')).getTime() : null;
+                    var date = dateTime ? new Date(dateTime).getTime() : null;
 
-                var date = dateTime ? new Date(dateTime).getTime() : null;
+                    // Obtener los valores de los filtros de área y rol
+                    var areaFilter = $('#areaFilter').val();
+                    var roleFilter = $('#roleFilter').val();
+                    var area = data[6]; // Índice de la columna de área
+                    var rol = data[5]; // Índice de la columna de rol
 
-                // Obtener los valores de los filtros de área y rol
-                var areaFilter = $('#areaFilter').val();
-                var roleFilter = $('#roleFilter').val();
-                var area = data[6]; // Índice de la columna de área
-                var rol = data[5]; // Índice de la columna de rol
+                    // Comprobación de filtros de área
+                    var areaMatch = areaFilter ? area === areaFilter : true;
+                    // Comprobación de filtros de rol
+                    var roleMatch = roleFilter ? rol === roleFilter : true;
 
-                // Comprobación de filtros de área
-                var areaMatch = areaFilter ? area === areaFilter : true;
-                // Comprobación de filtros de rol
-                var roleMatch = roleFilter ? rol === roleFilter : true;
+                    if ($('#enableDateFilter').is(':checked')) {
+                        // Filtro por rango de fechas
+                        var minDateTime = minDate ? new Date(minDate + 'T' + (minTime || '00:00')).getTime() : null;
+                        var maxDateTime = maxDate ? new Date(maxDate + 'T' + (maxTime || '23:59')).getTime() : null;
 
-                if ($('#enableDateFilter').is(':checked')) {
-                    // Filtro por rango de fechas
-                    var minDateTime = minDate ? new Date(minDate + 'T' + (minTime || '00:00')).getTime() : null;
-                    var maxDateTime = maxDate ? new Date(maxDate + 'T' + (maxTime || '23:59')).getTime() : null;
-
-                    if (date >= minDateTime && date <= maxDateTime && areaMatch && roleMatch) {
-                        return true;
-                    }
-                    return false;
-                } else {
-                    // Filtro por fecha única
-                    if (singleDateTime) {
-                        if (date >= singleDateTime && date < singleDateTime + 24 * 60 * 60 * 1000 && areaMatch && roleMatch) {
+                        if (date >= minDateTime && date <= maxDateTime && areaMatch && roleMatch) {
                             return true;
                         }
                         return false;
+                    } else {
+                        // Filtro por fecha única
+                        if (singleDateTime) {
+                            if (date >= singleDateTime && date < singleDateTime + 24 * 60 * 60 * 1000 && areaMatch && roleMatch) {
+                                return true;
+                            }
+                            return false;
+                        }
+                        return areaMatch && roleMatch; // Si no hay filtros de fecha, solo chequea área y rol
                     }
-                    return areaMatch && roleMatch; // Si no hay filtros de fecha, solo chequea área y rol
-                }
-            });
+                });
 
 
             // Generar PDF
             $('#exportPDF').click(function () {
                 var filteredData = table.rows({ search: 'applied' }).data().toArray();
 
-                // Contador de áreas
-                var areaCounts = {};
+                // Contador de usuarios por área
+                var userAreaCounts = {};
                 filteredData.forEach(function (row) {
-                    var area = row[6];
-                    if (areaCounts[area]) {
-                        areaCounts[area]++;
+                    var userId = row[0]; // ID del usuario
+                    var name = row[1]; // Nombre
+                    var lastName1 = row[2]; // Primer apellido
+                    var lastName2 = row[3]; // Segundo apellido
+                    var area = row[6]; // Área
+
+                    if (!userAreaCounts[userId]) {
+                        userAreaCounts[userId] = {
+                            id: userId,
+                            name: name,
+                            lastName1: lastName1,
+                            lastName2: lastName2,
+                            areaCount: {}
+                        };
+                    }
+
+                    // Contar ingresos por área
+                    if (userAreaCounts[userId].areaCount[area]) {
+                        userAreaCounts[userId].areaCount[area]++;
                     } else {
-                        areaCounts[area] = 1;
+                        userAreaCounts[userId].areaCount[area] = 1;
                     }
                 });
+
+                // Crear tabla de conteo de usuarios por área
+                var areaTableData = [];
+                for (var userId in userAreaCounts) {
+                    var user = userAreaCounts[userId];
+                    for (var area in user.areaCount) {
+                        areaTableData.push([user.id, user.name, user.lastName1, user.lastName2, area, user.areaCount[area]]);
+                    }
+                }
 
                 // Generar PDF
                 const { jsPDF } = window.jspdf;
                 var doc = new jsPDF();
                 var leftsize = 20;
-                var width = 180;
+                var width = 170;
 
                 // Agregar título
                 doc.setFontSize(16);
-                doc.text("Informe de Ingresos", leftsize, 20);
+                doc.text("Informe de Ingresos", leftsize, 10);
 
                 // Texto de introducción
-                var firstRow = filteredData[0] || [];
-                var firstName = firstRow[1] || 'Nombre';
-                var lastName = firstRow[2] || 'Apellido1';
-                var lastName2 = firstRow[3] || 'Apellido2';
-                var introText = `Este es el registro de asistencia de ${firstName} ${lastName} ${lastName2}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
-                var splitText = doc.splitTextToSize(introText, width);
+                var userNames = [];
+                filteredData.forEach(function (row) {
+                    var name = row[1]; // Nombre
+                    var lastName1 = row[2]; // Primer apellido
+                    var lastName2 = row[3]; // Segundo apellido
+                    userNames.push(`${name} ${lastName1} ${lastName2}`);
+                });
+
+                // Crear una lista única de nombres
+                var uniqueNames = [...new Set(userNames)];
+                var namesList = uniqueNames.join(', ');
+
+                // Construir el texto de introducción
                 doc.setFontSize(12);
+                var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
+                var splitText = doc.splitTextToSize(introText, width);
+                
                 doc.text(splitText, leftsize, 30);
 
-                // Agregar tabla al PDF
+                // Agregar tabla al PDF con los datos de ingresos
                 var tableData = filteredData.map(function (row) {
                     return [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]];
                 });
@@ -312,25 +347,28 @@
                     body: tableData,
                 });
 
-                // Agregar texto de conclusión
+                // Agregar nueva tabla de conteo de usuarios por área
                 var finalY = doc.lastAutoTable.finalY || 50;
+                doc.text("Contador de Ingresos por Usuario y Área:", leftsize, finalY + 10);
+
+                doc.autoTable({
+                    startY: finalY + 15,
+                    head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Cantidad de Ingresos']],
+                    body: areaTableData,
+                });
+
+                // Agregar texto de conclusión
+                finalY = doc.lastAutoTable.finalY || 50;
                 var conclusionText = "Conclusión: Los datos muestran un patrón constante de acceso, lo cual es positivo para la seguridad.";
                 var conclusionSplitText = doc.splitTextToSize(conclusionText, width);
                 doc.text(conclusionSplitText, leftsize, finalY + 10);
 
-                // Contador de áreas
-                var areaCountText = "Contador de áreas filtradas:\n";
-                for (var area in areaCounts) {
-                    areaCountText += area + ": " + areaCounts[area] + "\n";
-                }
-                var splitAreaCountText = doc.splitTextToSize(areaCountText, width);
-                doc.text(splitAreaCountText, leftsize, finalY + 30);
-
                 // Guardar PDF
                 doc.save('informe_ingresos.pdf');
             });
-        });
-    </script>
+        
+    });        
+        </script>
 </body>
 
 
