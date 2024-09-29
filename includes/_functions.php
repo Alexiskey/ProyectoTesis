@@ -56,7 +56,7 @@ function eliminar_registro() {
 function editar_Area() {
     global $conexion; 
     extract($_POST);
-    $consulta = "UPDATE areas SET nombreArea = '$nombreArea' WHERE idAreas = '$idAreas'";
+    $consulta = "UPDATE areas SET nombreArea = '$nombreArea', permisosRoles = '$RolesPerm' WHERE idAreas = '$idAreas'";
     mysqli_query($conexion, $consulta);
     header('Location: ../views/adminAreas.php');
 }

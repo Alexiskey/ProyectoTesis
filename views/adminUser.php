@@ -66,10 +66,10 @@
               <td><?php echo $fila['nombreRol']; ?></td>
               <td><?php echo $fila['status']; ?></td>				
               <td>
-                <a class="btn btn-warning" href="./subView/editar_user.php?idUsuario=<?php echo $fila['idUsuario']?> ">
+                <a class="btn btn-warning" href="./subView/editarUser.php?idUsuario=<?php echo $fila['idUsuario']?> ">
                 Editar </a>
-
-                <a class="btn btn-danger" href="./subView/eliminar_user.php?idUsuario=<?php echo $fila['idUsuario']?>">
+a
+                <a class="btn btn-danger" href="./subView/eliminarUser.php?idUsuario=<?php echo $fila['idUsuario']?>">
                 Eliminar</a>  
               </td>
               </tr>

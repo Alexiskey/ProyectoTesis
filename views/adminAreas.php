@@ -30,6 +30,7 @@
                 <tr>
                     <th>idÁrea</th>
                     <th>Nombre del Área</th>
+                    <th>Roles Permitidos</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -46,9 +47,10 @@
                     <tr>
                         <td><?php echo $fila['idAreas']; ?></td>
                         <td><?php echo $fila['nombreArea']; ?></td>
+                        <td><?php echo $fila['permisosRoles']; ?></td>
                         <td>
-                        <a class="btn btn-warning" href="./subView/editar_area.php?idAreas=<?php echo $fila['idAreas']?> "> Editar </a>
-                        <a class="btn btn-danger" href="./subView/eliminar_area.php?idAreas=<?php echo $fila['idAreas']; ?>">Eliminar</a>
+                        <a class="btn btn-warning" href="./subView/editarArea.php?idAreas=<?php echo $fila['idAreas']?> "> Editar </a>
+                        <a class="btn btn-danger" href="./subView/eliminarArea.php?idAreas=<?php echo $fila['idAreas']; ?>">Eliminar</a>
                         </td>  
                     </tr>
                 <?php
