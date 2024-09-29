@@ -265,207 +265,224 @@
                     }
                 });
 
-
             // Generar PDF
-// Generar PDF
-$('#exportPDF').click(function () {
-    var filteredData = table.rows({ search: 'applied' }).data().toArray();
+            $('#exportPDF').click(function () {
+                var filteredData = table.rows({ search: 'applied' }).data().toArray();
 
-    // Contador de usuarios por área y día
-    var userAreaDayCounts = {};
-    filteredData.forEach(function (row) {
-        var userId = row[0]; // ID del usuario
-        var name = row[1]; // Nombre
-        var lastName1 = row[2]; // Primer apellido
-        var lastName2 = row[3]; // Segundo apellido
-        var area = row[6]; // Área
-        var dateTime = row[7]; // Fecha y hora
+                // Contador de usuarios por área y día
+                var userAreaDayCounts = {};
+                filteredData.forEach(function (row) {
+                    var userId = row[0]; // ID del usuario
+                    var name = row[1]; // Nombre
+                    var lastName1 = row[2]; // Primer apellido
+                    var lastName2 = row[3]; // Segundo apellido
+                    var area = row[6]; // Área
+                    var dateTime = row[7]; // Fecha y hora
 
-        // Extraer solo la fecha (sin la hora)
-        var date = dateTime.split(' ')[0];
-        // Extraer la hora
-        var time = dateTime.split(' ')[1];
+                    // Extraer solo la fecha (sin la hora)
+                    var date = dateTime.split(' ')[0];
+                    // Extraer la hora
+                    var time = dateTime.split(' ')[1];
 
-        if (!userAreaDayCounts[date]) {
-            userAreaDayCounts[date] = {};
-        }
+                    if (!userAreaDayCounts[date]) {
+                        userAreaDayCounts[date] = {};
+                    }
 
-        if (!userAreaDayCounts[date][userId]) {
-            userAreaDayCounts[date][userId] = {
-                id: userId,
-                name: name,
-                lastName1: lastName1,
-                lastName2: lastName2,
-                areaCount: {}
-            };
-        }
+                    if (!userAreaDayCounts[date][userId]) {
+                        userAreaDayCounts[date][userId] = {
+                            id: userId,
+                            name: name,
+                            lastName1: lastName1,
+                            lastName2: lastName2,
+                            areaCount: {}
+                        };
+                    }
 
-        if (!userAreaDayCounts[date][userId].areaCount[area]) {
-            userAreaDayCounts[date][userId].areaCount[area] = { count: 0, time: [] }; // Cambiar a objeto para almacenar la hora
-        }
+                    if (!userAreaDayCounts[date][userId].areaCount[area]) {
+                        userAreaDayCounts[date][userId].areaCount[area] = { count: 0, time: [] }; // Cambiar a objeto para almacenar la hora
+                    }
 
-        // Incrementar el contador de ingresos por área en esa fecha
-        userAreaDayCounts[date][userId].areaCount[area].count++;
-        userAreaDayCounts[date][userId].areaCount[area].time.push(time); // Agregar la hora
-    });
-
-    // Generar PDF
-    const { jsPDF } = window.jspdf;
-    var doc = new jsPDF();
-    var leftsize = 20;
-    var width = 170;
-    var marginY = 10; // Margen vertical adicional para evitar superposición
-
-    // Agregar título
-    doc.setFontSize(16);
-    doc.text("Informe de Ingresos", leftsize, 10);
-
-    // Texto de introducción
-    var userNames = [];
-    filteredData.forEach(function (row) {
-        var name = row[1]; // Nombre
-        var lastName1 = row[2]; // Primer apellido
-        var lastName2 = row[3]; // Segundo apellido
-        userNames.push(`${name} ${lastName1} ${lastName2}`);
-    });
-
-    // Crear una lista única de nombres
-    var uniqueNames = [...new Set(userNames)];
-    var namesList = uniqueNames.join(', ');
-
-    // Construir el texto de introducción
-    doc.setFontSize(12);
-    var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
-    var splitText = doc.splitTextToSize(introText, width);
-    
-    doc.text(splitText, leftsize, 30);
-
-    // Agregar primera tabla al PDF con los datos de ingresos sin agrupar
-    var tableData = filteredData.map(function (row) {
-        return [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]];
-    });
-
-    // Ordenar tableData por fecha y hora de ingreso (suponiendo que la fecha está en la posición 7)
-    tableData.sort(function (a, b) {
-        var dateTimeA = new Date(a[7]); // Convertir a objeto Date
-        var dateTimeB = new Date(b[7]); // Convertir a objeto Date
-        return dateTimeA - dateTimeB; // Ordenar de menor a mayor
-    });
-
-    doc.autoTable({
-        startY: 50,
-        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso']],
-        body: tableData,
-    });
-
-    var finalY = doc.lastAutoTable.finalY || 50;
-    doc.setFontSize(16);
-    finalY += marginY;
-    doc.text("Detalle", leftsize, finalY);
-
-    var resumenTableData = []; // Para almacenar datos de resumen
-
-    for (var date in userAreaDayCounts) {
-        doc.setFontSize(12);
-        finalY += marginY; // Añadir un margen vertical antes de cada título
-
-        // Crear cuerpo de la tabla por día
-        var areaDayTableData = [];
-        var allHours = []; // Arreglo para almacenar todas las horas de un día específico
-
-        for (var userId in userAreaDayCounts[date]) {
-            var user = userAreaDayCounts[date][userId];
-            for (var area in user.areaCount) {
-                var areaData = user.areaCount[area];
-                areaData.time.forEach(time => {
-                    areaDayTableData.push([
-                        user.id, user.name, user.lastName1, user.lastName2, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
-                    ]);
-                    
-                    // Almacenar las horas trabajadas para este usuario en el día
-                    allHours.push(time);
+                    // Incrementar el contador de ingresos por área en esa fecha
+                    userAreaDayCounts[date][userId].areaCount[area].count++;
+                    userAreaDayCounts[date][userId].areaCount[area].time.push(time); // Agregar la hora
                 });
-            }
-        }
 
-        // Ordenar areaDayTableData por fecha y hora
-        areaDayTableData.sort(function (a, b) {
-            var dateTimeA = new Date(a[5]); // Convertir a objeto Date
-            var dateTimeB = new Date(b[5]); // Convertir a objeto Date
-            return dateTimeA - dateTimeB; // Ordenar de menor a mayor
-        });
+                // Generar PDF
+                const { jsPDF } = window.jspdf;
+                var doc = new jsPDF();
+                var leftsize = 20;
+                var width = 170;
+                var marginY = 10; // Margen vertical adicional para evitar superposición
 
-        // Agregar la tabla para ese día
-        doc.autoTable({
-            startY: finalY + marginY, // Añadir margen vertical antes de la tabla
-            head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
-            body: areaDayTableData,
-        });
+                // Agregar título
+                doc.setFontSize(16);
+                doc.text("Informe de Ingresos", leftsize, 10);
 
-        // Actualizar finalY para después de la tabla
-        finalY = doc.lastAutoTable.finalY || finalY + marginY;
+                // Texto de introducción
+                var userNames = [];
+                filteredData.forEach(function (row) {
+                    var name = row[1]; // Nombre
+                    var lastName1 = row[2]; // Primer apellido
+                    var lastName2 = row[3]; // Segundo apellido
+                    userNames.push(`${name} ${lastName1} ${lastName2}`);
+                });
 
-        // Calcular total de horas trabajadas para el día
-        if (allHours.length > 0) {
-            var firstHour = new Date(`1970-01-01T${allHours[0]}:00`);
-            var lastHour = new Date(`1970-01-01T${allHours[allHours.length - 1]}:00`);
-            
-            // Corregir la diferencia: restar firstHour de lastHour
-            var totalTrabajadas = (firstHour - lastHour) / (1000 * 60 * 60); // Diferencia en horas
-            var totalTrabajadasEnMinutos = (firstHour - lastHour) / (1000 * 60); // Diferencia en minutos
-            var totalhoras = totalTrabajadasEnMinutos / 60;
-            var totalminutos = (totalhoras - parseFloat(totalhoras.toFixed(0)))*60; 
-            totalhoras = parseFloat(totalhoras.toFixed(0)) - 1;
-            totalminutos = parseFloat(totalminutos.toFixed(0));
-           
-        } else {
-            var totalTrabajadas = 0;
-        }
-        if(totalminutos<0){
-            totalhoras = totalhoras - 1;
-            totalminutos = 60 + totalminutos;
-        }
-        var horasLaborales = 9; // Asumiendo que 9 es el total de horas laborales
-        var totalformatohoras = `${totalhoras}:${totalminutos}`;
-        totalTrabajadas = parseFloat(totalTrabajadas.toFixed(2)) - 1; // Acorta a 2 decimales
-        var totalfinal = totalTrabajadas - horasLaborales; 
-        totalfinal = parseFloat(totalfinal.toFixed(2));
+                // Crear una lista única de nombres
+                var uniqueNames = [...new Set(userNames)];
+                var namesList = uniqueNames.join(', ');
 
-        // Agregar datos a resumenTableData
-        resumenTableData.push([date, horasLaborales, totalTrabajadas, totalfinal , totalformatohoras]);
+                // Construir el texto de introducción
+                doc.setFontSize(12);
+                var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
+                var splitText = doc.splitTextToSize(introText, width);
+                
+                doc.text(splitText, leftsize, 30);
 
-}
-    // Ordenar areaDayTableData por fecha y hora
-    resumenTableData.sort(function (a, b) {
-        var dateTimeA = new Date(a[0]); // Convertir a objeto Date
-        var dateTimeB = new Date(b[0]); // Convertir a objeto Date
-        return dateTimeA - dateTimeB; // Ordenar de menor a mayor
-    });
-    
-    // Crear y agregar la tabla final
-    finalY += marginY; // Añadir margen antes de la nueva tabla
-    doc.setFontSize(16);
-    doc.text("Resumen de Horas Laborales", leftsize, finalY);
-    
-    doc.autoTable({
-        startY: finalY + marginY,
-        head: [['Fecha', 'Horas Laborales', 'Horas Trabajadas', 'Total', 'Total Horas']],
-        body: resumenTableData,
-    });
+                // Agregar primera tabla al PDF con los datos de ingresos sin agrupar
+                var tableData = filteredData.map(function (row) {
+                    return [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]];
+                });
 
-    // Asegurarse de que haya un margen después de la tabla antes de la conclusión
-    finalY = doc.lastAutoTable.finalY || finalY + marginY; 
-    finalY += marginY; // Añadir margen antes del texto de conclusión
+                // Ordenar tableData por fecha y hora de ingreso (suponiendo que la fecha está en la posición 7)
+                tableData.sort(function (a, b) {
+                    var dateTimeA = new Date(a[7]); // Convertir a objeto Date
+                    var dateTimeB = new Date(b[7]); // Convertir a objeto Date
+                    return dateTimeA - dateTimeB; // Ordenar de menor a mayor
+                });
 
-    // Agregar texto de conclusión
-    var conclusionText = "Conclusión: Los datos muestran un patrón constante de acceso, dividido por áreas y fechas, lo cual es positivo para la seguridad.";
-    var conclusionSplitText = doc.splitTextToSize(conclusionText, width);
-    doc.text(conclusionSplitText, leftsize, finalY);
+                doc.autoTable({
+                    startY: 50,
+                    head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso']],
+                    body: tableData,
+                });
+                doc.addPage();
+                var finalY = 10;
+                doc.setFontSize(16);
+                finalY += marginY;
+                doc.text("Detalle", leftsize, finalY);
 
-    // Guardar PDF
-    doc.save('informe_ingresos.pdf');
-});
+                doc.setFontSize(12);
+                finalY += marginY;
 
+                var Text = `A continuación, podrá ver el detalle diario de los ingresos realizados durante la semana, organizados por usuario.`;
+                var splitText = doc.splitTextToSize(Text, width);
+                doc.text(splitText, leftsize, 30);
+
+
+
+                var resumenTableData = []; // Para almacenar datos de resumen
+                var sortedDates = Object.keys(userAreaDayCounts).sort(function(a, b) {
+                    return new Date(a) - new Date(b); // Ordenar de menor a mayor
+                });
+
+                // Iterar sobre las fechas ya ordenadas
+                for (var i = 0; i < sortedDates.length; i++) {
+                    var date = sortedDates[i];
+                    doc.setFontSize(12);
+                    finalY += marginY; // Añadir un margen vertical antes de cada título
+
+                    // Crear cuerpo de la tabla por día
+                    var areaDayTableData = [];
+                    var allHours = []; // Arreglo para almacenar todas las horas de un día específico
+
+                    for (var userId in userAreaDayCounts[date]) {
+                        var user = userAreaDayCounts[date][userId];
+                        for (var area in user.areaCount) {
+                            var areaData = user.areaCount[area];
+                            areaData.time.forEach(time => {
+                                areaDayTableData.push([
+                                    user.id, user.name, user.lastName1, user.lastName2, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
+                                ]);
+                                
+                                // Almacenar las horas trabajadas para este usuario en el día
+                                allHours.push(time);
+                            });
+                        }
+                    }
+
+                    // Ordenar areaDayTableData por fecha y hora
+                    areaDayTableData.sort(function (a, b) {
+                        var dateTimeA = new Date(a[5]); // Convertir a objeto Date
+                        var dateTimeB = new Date(b[5]); // Convertir a objeto Date
+                        return dateTimeA - dateTimeB; // Ordenar de menor a mayor
+                    });
+
+                    doc.setFontSize(14);
+                    finalY += marginY;                
+                    doc.text("Tabla detalle de dia " + `${date}`+".", leftsize, finalY);
+
+                    // Agregar la tabla para ese día
+                    doc.autoTable({
+                        startY: finalY + marginY, // Añadir margen vertical antes de la tabla
+                        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
+                        body: areaDayTableData,
+                    });
+
+                    // Actualizar finalY para después de la tabla
+                    finalY = doc.lastAutoTable.finalY || finalY + marginY;
+
+                    // Calcular total de horas trabajadas para el día
+                    if (allHours.length > 0) {
+                        var firstHour = new Date(`1970-01-01T${allHours[0]}:00`);
+                        var lastHour = new Date(`1970-01-01T${allHours[allHours.length - 1]}:00`);
+                        
+                        // Corregir la diferencia: restar firstHour de lastHour
+                        var totalTrabajadas = (firstHour - lastHour) / (1000 * 60 * 60); // Diferencia en horas
+                        var totalTrabajadasEnMinutos = (firstHour - lastHour) / (1000 * 60); // Diferencia en minutos
+                        var totalhoras = totalTrabajadasEnMinutos / 60;
+                        var totalminutos = (totalhoras - parseFloat(totalhoras.toFixed(0)))*60; 
+                        totalhoras = parseFloat(totalhoras.toFixed(0)) - 1;
+                        totalminutos = parseFloat(totalminutos.toFixed(0));
+                    
+                    } else {
+                        var totalTrabajadas = 0;
+                    }
+                    if(totalminutos<0){
+                        totalhoras = totalhoras - 1;
+                        totalminutos = 60 + totalminutos;
+                    }
+                    var horasLaborales = 9; // Asumiendo que 9 es el total de horas laborales
+                    var totalformatohoras = `${totalhoras}:${totalminutos}`;
+                    totalTrabajadas = parseFloat(totalTrabajadas.toFixed(2)) - 1; // Acorta a 2 decimales
+                    var totalfinal = totalTrabajadas - horasLaborales; 
+                    totalfinal = parseFloat(totalfinal.toFixed(2));
+
+                    // Agregar datos a resumenTableData
+                    resumenTableData.push([date, horasLaborales, totalTrabajadas, totalfinal , totalformatohoras]);
+
+                }
+                // Ordenar areaDayTableData por fecha y hora
+                resumenTableData.sort(function (a, b) {
+                    var dateTimeA = new Date(a[0]); // Convertir a objeto Date
+                    var dateTimeB = new Date(b[0]); // Convertir a objeto Date
+                    return dateTimeA - dateTimeB; // Ordenar de menor a mayor
+                });
+                
+                doc.addPage();
+                // Crear y agregar la tabla final
+                finalY = 10;
+                finalY += marginY; // Añadir margen antes de la nueva tabla
+                doc.setFontSize(16);
+                doc.text("Resumen de Horas Laborales", leftsize, finalY);
+                
+                doc.autoTable({
+                    startY: finalY + marginY,
+                    head: [['Fecha', 'Horas Laborales', 'Horas Trabajadas', 'Total', 'Total Horas']],
+                    body: resumenTableData,
+                });
+
+                // Asegurarse de que haya un margen después de la tabla antes de la conclusión
+                finalY = doc.lastAutoTable.finalY || finalY + marginY; 
+                finalY += marginY; // Añadir margen antes del texto de conclusión
+
+                // Agregar texto de conclusión
+                var conclusionText = "Conclusión: Los datos muestran un patrón constante de acceso, dividido por áreas y fechas, lo cual es positivo para la seguridad.";
+                var conclusionSplitText = doc.splitTextToSize(conclusionText, width);
+                doc.text(conclusionSplitText, leftsize, finalY);
+
+                // Guardar PDF
+                doc.save('informe_ingresos.pdf');
+            });
 
         });        
     </script>
