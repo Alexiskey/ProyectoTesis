@@ -267,108 +267,139 @@
 
 
             // Generar PDF
-            $('#exportPDF').click(function () {
-                var filteredData = table.rows({ search: 'applied' }).data().toArray();
+// Generar PDF
+$('#exportPDF').click(function () {
+    var filteredData = table.rows({ search: 'applied' }).data().toArray();
 
-                // Contador de usuarios por área
-                var userAreaCounts = {};
-                filteredData.forEach(function (row) {
-                    var userId = row[0]; // ID del usuario
-                    var name = row[1]; // Nombre
-                    var lastName1 = row[2]; // Primer apellido
-                    var lastName2 = row[3]; // Segundo apellido
-                    var area = row[6]; // Área
+    // Contador de usuarios por área y día
+    var userAreaDayCounts = {};
+    filteredData.forEach(function (row) {
+        var userId = row[0]; // ID del usuario
+        var name = row[1]; // Nombre
+        var lastName1 = row[2]; // Primer apellido
+        var lastName2 = row[3]; // Segundo apellido
+        var area = row[6]; // Área
+        var dateTime = row[7]; // Fecha y hora
 
-                    if (!userAreaCounts[userId]) {
-                        userAreaCounts[userId] = {
-                            id: userId,
-                            name: name,
-                            lastName1: lastName1,
-                            lastName2: lastName2,
-                            areaCount: {}
-                        };
-                    }
+        // Extraer solo la fecha (sin la hora)
+        var date = dateTime.split(' ')[0];
 
-                    // Contar ingresos por área
-                    if (userAreaCounts[userId].areaCount[area]) {
-                        userAreaCounts[userId].areaCount[area]++;
-                    } else {
-                        userAreaCounts[userId].areaCount[area] = 1;
-                    }
-                });
+        if (!userAreaDayCounts[date]) {
+            userAreaDayCounts[date] = {};
+        }
 
-                // Crear tabla de conteo de usuarios por área
-                var areaTableData = [];
-                for (var userId in userAreaCounts) {
-                    var user = userAreaCounts[userId];
-                    for (var area in user.areaCount) {
-                        areaTableData.push([user.id, user.name, user.lastName1, user.lastName2, area, user.areaCount[area]]);
-                    }
-                }
+        if (!userAreaDayCounts[date][userId]) {
+            userAreaDayCounts[date][userId] = {
+                id: userId,
+                name: name,
+                lastName1: lastName1,
+                lastName2: lastName2,
+                areaCount: {}
+            };
+        }
 
-                // Generar PDF
-                const { jsPDF } = window.jspdf;
-                var doc = new jsPDF();
-                var leftsize = 20;
-                var width = 170;
+        if (!userAreaDayCounts[date][userId].areaCount[area]) {
+            userAreaDayCounts[date][userId].areaCount[area] = 0;
+        }
 
-                // Agregar título
-                doc.setFontSize(16);
-                doc.text("Informe de Ingresos", leftsize, 10);
+        // Incrementar el contador de ingresos por área en esa fecha
+        userAreaDayCounts[date][userId].areaCount[area]++;
+    });
 
-                // Texto de introducción
-                var userNames = [];
-                filteredData.forEach(function (row) {
-                    var name = row[1]; // Nombre
-                    var lastName1 = row[2]; // Primer apellido
-                    var lastName2 = row[3]; // Segundo apellido
-                    userNames.push(`${name} ${lastName1} ${lastName2}`);
-                });
+    // Generar PDF
+    const { jsPDF } = window.jspdf;
+    var doc = new jsPDF();
+    var leftsize = 20;
+    var width = 170;
+    var marginY = 10; // Margen vertical adicional para evitar superposición
 
-                // Crear una lista única de nombres
-                var uniqueNames = [...new Set(userNames)];
-                var namesList = uniqueNames.join(', ');
+    // Agregar título
+    doc.setFontSize(16);
+    doc.text("Informe de Ingresos", leftsize, 10);
 
-                // Construir el texto de introducción
-                doc.setFontSize(12);
-                var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
-                var splitText = doc.splitTextToSize(introText, width);
-                
-                doc.text(splitText, leftsize, 30);
+    // Texto de introducción
+    var userNames = [];
+    filteredData.forEach(function (row) {
+        var name = row[1]; // Nombre
+        var lastName1 = row[2]; // Primer apellido
+        var lastName2 = row[3]; // Segundo apellido
+        userNames.push(`${name} ${lastName1} ${lastName2}`);
+    });
 
-                // Agregar tabla al PDF con los datos de ingresos
-                var tableData = filteredData.map(function (row) {
-                    return [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]];
-                });
+    // Crear una lista única de nombres
+    var uniqueNames = [...new Set(userNames)];
+    var namesList = uniqueNames.join(', ');
 
-                doc.autoTable({
-                    startY: 50,
-                    head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso']],
-                    body: tableData,
-                });
+    // Construir el texto de introducción
+    doc.setFontSize(12);
+    var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
+    var splitText = doc.splitTextToSize(introText, width);
+    
+    doc.text(splitText, leftsize, 30);
 
-                // Agregar nueva tabla de conteo de usuarios por área
-                var finalY = doc.lastAutoTable.finalY || 50;
-                doc.text("Contador de Ingresos por Usuario y Área:", leftsize, finalY + 10);
+    // Agregar primera tabla al PDF con los datos de ingresos sin agrupar
+    var tableData = filteredData.map(function (row) {
+        return [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]];
+    });
 
-                doc.autoTable({
-                    startY: finalY + 15,
-                    head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Cantidad de Ingresos']],
-                    body: areaTableData,
-                });
+    doc.autoTable({
+        startY: 50,
+        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso']],
+        body: tableData,
+    });
 
-                // Agregar texto de conclusión
-                finalY = doc.lastAutoTable.finalY || 50;
-                var conclusionText = "Conclusión: Los datos muestran un patrón constante de acceso, lo cual es positivo para la seguridad.";
-                var conclusionSplitText = doc.splitTextToSize(conclusionText, width);
-                doc.text(conclusionSplitText, leftsize, finalY + 10);
+    // Generar una tabla por cada día en el conteo de ingresos
+    var finalY = doc.lastAutoTable.finalY || 50;
+    doc.setFontSize(16);
+    finalY += marginY;
+    doc.text("Detalle", leftsize, finalY);
+    for (var date in userAreaDayCounts) {
+        doc.setFontSize(12);
+        finalY += marginY; // Añadir un margen vertical antes de cada título
+        // Agregar título de la tabla para cada día
+        doc.text(`Hubo un total de ${totalIngresos} ingresos en el area ${area}.`, leftsize, finalY);
 
-                // Guardar PDF
-                doc.save('informe_ingresos.pdf');
-            });
-        
-    });        
-        </script>
+        // Crear cuerpo de la tabla por día
+        var areaDayTableData = [];
+        for (var userId in userAreaDayCounts[date]) {
+            var user = userAreaDayCounts[date][userId];
+            for (var area in user.areaCount) {
+                areaDayTableData.push([
+                    user.id, user.name, user.lastName1, user.lastName2, area, date, user.areaCount[area]
+                ]);
+            }
+        }
+
+        // Agregar la tabla para ese día
+        doc.autoTable({
+            startY: finalY + marginY, // Añadir margen vertical antes de la tabla
+            head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos']],
+            body: areaDayTableData,
+        });
+
+        // Actualizar finalY para después de la tabla
+        finalY = doc.lastAutoTable.finalY || finalY + marginY;
+
+        // Contador de ingresos totales por día
+        var totalIngresos = areaDayTableData.reduce((total, row) => total + row[6], 0);
+        finalY += marginY; // Añadir margen antes del contador
+        doc.text(`Conteo de Ingresos para el día: ${date}`, leftsize, finalY);
+    }
+
+    // Agregar texto de conclusión
+    finalY += marginY; // Añadir margen antes del texto de conclusión
+    var conclusionText = "Conclusión: Los datos muestran un patrón constante de acceso, dividido por áreas y fechas, lo cual es positivo para la seguridad.";
+    var conclusionSplitText = doc.splitTextToSize(conclusionText, width);
+    doc.text(conclusionSplitText, leftsize, finalY + marginY);
+
+    // Guardar PDF
+    doc.save('informe_ingresos.pdf');
+});
+
+
+
+        });        
+    </script>
 </body>
 
 
