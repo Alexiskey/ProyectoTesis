@@ -418,7 +418,7 @@ $('#exportPDF').click(function () {
                             var areaData = user.areaCount[area];
                             areaData.time.forEach(time => {
                                 areaDayTableData.push([
-                                    user.id, user.rut, user.name, user.lastName1, user.lastName2, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
+                                    user.id, user.rut, user.name, user.lastName1, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
                                 ]);
                                 
                                 // Almacenar las horas trabajadas para este usuario en el día
@@ -441,7 +441,7 @@ $('#exportPDF').click(function () {
                     // Agregar la tabla para ese día
                     doc.autoTable({
                         startY: finalY + marginY, // Añadir margen vertical antes de la tabla
-                        head: [['Rut', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
+                        head: [['Rut', 'Nombre', 'Apellido1', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
                         body: areaDayTableData,
                     });
 
@@ -535,11 +535,17 @@ $('#exportPDF').click(function () {
                 finalY = finalY + marginY; 
                 finalY += marginY; // Añadir margen antes del texto de conclusión
 
-                // Agregar texto de conclusión
-                var conclusionText = "Conclusión: Los datos muestran un patrón constante de acceso, dividido por áreas y fechas, lo cual es positivo para la seguridad.";
-                var conclusionSplitText = doc.splitTextToSize(conclusionText, width);
-                doc.text(conclusionSplitText, leftsize, finalY);
+                // Espacio antes de las firmas
+                finalY += 20; 
 
+                // Línea de firma del usuario
+                doc.line(20, finalY, 90, finalY); // Línea de firma del usuario
+                doc.text("Firma del Usuario", 20, finalY + 5); // Etiqueta de firma del usuario
+
+                // Línea de firma de la empresa
+                doc.line(100, finalY, 170, finalY); // Línea de firma de la empresa
+                doc.text("Firma de la Empresa", 120, finalY + 5); // Etiqueta de firma de la empresa
+                
                 // Guardar PDF
                 doc.save('informe_ingresos.pdf');
             });
