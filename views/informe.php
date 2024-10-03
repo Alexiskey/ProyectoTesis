@@ -276,6 +276,8 @@ $('#exportPDF').click(function () {
         var name = row[1]; // Nombre
         var lastName1 = row[2]; // Primer apellido
         var lastName2 = row[3]; // Segundo apellido
+        var rut = row[4]; // Rut
+        var rol = row[5]; // Rol
         var area = row[6]; // Área
         var dateTime = row[7]; // Fecha y hora
 
@@ -295,6 +297,7 @@ $('#exportPDF').click(function () {
                 lastName1: lastName1,
                 lastName2: lastName2,
                 areaCount: {},
+                rut: rut,
                 entryTimes: [], // Almacenar las horas de entrada
                 exitTimes: []   // Almacenar las horas de salida
             };
@@ -360,7 +363,7 @@ $('#exportPDF').click(function () {
             const area = Object.keys(user.areaCount).join(', ');
 
             // Agregar los datos al array
-            tableData.push([userId, user.name, user.lastName1, user.lastName2, '', '', area, date, entryTime, exitTime]);
+            tableData.push([userId, user.name, user.lastName1, user.lastName2, user.rut, user.rol, area, date, entryTime, exitTime]);
         }
     }
 
@@ -413,7 +416,7 @@ $('#exportPDF').click(function () {
                             var areaData = user.areaCount[area];
                             areaData.time.forEach(time => {
                                 areaDayTableData.push([
-                                    user.id, user.name, user.lastName1, user.lastName2, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
+                                    user.id, user.rut, user.name, user.lastName1, user.lastName2, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
                                 ]);
                                 
                                 // Almacenar las horas trabajadas para este usuario en el día
@@ -436,7 +439,7 @@ $('#exportPDF').click(function () {
                     // Agregar la tabla para ese día
                     doc.autoTable({
                         startY: finalY + marginY, // Añadir margen vertical antes de la tabla
-                        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
+                        head: [['Rut', 'Nombre', 'Apellido1', 'Apellido2', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
                         body: areaDayTableData,
                     });
 
@@ -464,13 +467,35 @@ $('#exportPDF').click(function () {
                         totalminutos = 60 + totalminutos;
                     }
                     var horasLaborales = 9; // Asumiendo que 9 es el total de horas laborales
-                    var totalformatohoras = `${totalhoras}:${totalminutos}`;
                     totalTrabajadas = parseFloat(totalTrabajadas.toFixed(2)) - 1; // Acorta a 2 decimales
                     var totalfinal = totalTrabajadas - horasLaborales; 
-                    totalfinal = parseFloat(totalfinal.toFixed(2));
+                    totalfinal = parseFloat(totalfinal.toFixed(2)); // Acorta el valor final a 2 decimales
+                    
+
+                    // Inicializar variables para horas y minutos
+                    var horas, minutos;
+
+                    // Verificar si totalfinal es negativo o positivo
+                    if (totalfinal >= 0) {
+                        // Para valores positivos
+                        horas = Math.floor(totalfinal);
+                        minutos = Math.round((totalfinal - horas) * 60);
+                    } else {
+                        // Para valores negativos
+                        horas = Math.ceil(totalfinal); // Usamos ceil para no bajar más allá de cero
+                        minutos = Math.round(Math.abs(totalfinal - horas) * 60);
+                    }
+
+                    // Aseguramos que los minutos siempre tengan dos dígitos
+                    var formatoMinutos = minutos < 10 ? "0" + minutos : minutos;
+
+                    // Formatear el resultado como h:m, incluyendo el signo negativo si es necesario
+                    var finalFormatoHora = (totalfinal < 0 ? "-" : "") + Math.abs(horas) + ":" + formatoMinutos;
+
 
                     // Agregar datos a resumenTableData
-                    resumenTableData.push([date, horasLaborales, totalTrabajadas, totalfinal , totalformatohoras]);
+                    resumenTableData.push([user.rut, date, horasLaborales, totalTrabajadas, totalfinal, finalFormatoHora]);
+
 
                 }
                 // Ordenar areaDayTableData por fecha y hora
@@ -489,7 +514,7 @@ $('#exportPDF').click(function () {
                 
                 doc.autoTable({
                     startY: finalY + marginY,
-                    head: [['Fecha', 'Horas Laborales', 'Horas Trabajadas', 'Total', 'Total Horas']],
+                    head: [['Rut','Fecha', 'Horas Laborales', 'Horas Trabajadas', 'Total', 'Total Horas']],
                     body: resumenTableData,
                 });
 
