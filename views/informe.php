@@ -341,13 +341,8 @@ $('#exportPDF').click(function () {
     // Crear una lista única de nombres
     var uniqueNames = [...new Set(userNames)];
     var namesList = uniqueNames.join(', ');
-
-    // Construir el texto de introducción
-    doc.setFontSize(12);
-    var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
-    var splitText = doc.splitTextToSize(introText, width);
     
-    doc.text(splitText, leftsize, 30);
+
 
     // Agregar primera tabla al PDF con los datos de ingresos sin agrupar
     var tableData = [];
@@ -367,14 +362,27 @@ $('#exportPDF').click(function () {
         }
     }
 
+    var allDates = filteredData.map(function (row) {
+        return row[7].split(' ')[0]; // Extraemos solo la fecha (sin la hora)
+    });
+
     // Ordenar tableData por fecha
-    tableData.sort(function (a, b) {
+    allDates.sort(function (a, b) {
         var dateA = new Date(a[5]); // Convertir a objeto Date
         var dateB = new Date(b[5]); // Convertir a objeto Date
         return dateA - dateB; // Ordenar de menor a mayor
     });
 
-    
+
+    // Obtener la fecha de inicio (la primera en allDates) y la fecha final (la última en allDates)
+    var fechaFinal = allDates[0];
+    var fechaInicio = allDates[allDates.length - 1];
+
+    // Construir el texto de introducción
+    doc.setFontSize(12);
+    var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados entre el ${fechaInicio} y el ${fechaFinal}, detallando la información de los usuarios, su rol, y el área de acceso.`;
+    var splitText = doc.splitTextToSize(introText, width);
+    doc.text(splitText, leftsize, 30);
 
     // Agregar tabla al PDF
     doc.autoTable({
