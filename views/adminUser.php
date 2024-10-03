@@ -68,7 +68,6 @@
               <td>
                 <a class="btn btn-warning" href="./subView/editarUser.php?idUsuario=<?php echo $fila['idUsuario']?> ">
                 Editar </a>
-a
                 <a class="btn btn-danger" href="./subView/eliminarUser.php?idUsuario=<?php echo $fila['idUsuario']?>">
                 Eliminar</a>  
               </td>

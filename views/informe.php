@@ -265,96 +265,118 @@
                     }
                 });
 
-            // Generar PDF
-            $('#exportPDF').click(function () {
-                var filteredData = table.rows({ search: 'applied' }).data().toArray();
+// Generar PDF
+$('#exportPDF').click(function () {
+    var filteredData = table.rows({ search: 'applied' }).data().toArray();
 
-                // Contador de usuarios por área y día
-                var userAreaDayCounts = {};
-                filteredData.forEach(function (row) {
-                    var userId = row[0]; // ID del usuario
-                    var name = row[1]; // Nombre
-                    var lastName1 = row[2]; // Primer apellido
-                    var lastName2 = row[3]; // Segundo apellido
-                    var area = row[6]; // Área
-                    var dateTime = row[7]; // Fecha y hora
+    // Contador de usuarios por área y día
+    var userAreaDayCounts = {};
+    filteredData.forEach(function (row) {
+        var userId = row[0]; // ID del usuario
+        var name = row[1]; // Nombre
+        var lastName1 = row[2]; // Primer apellido
+        var lastName2 = row[3]; // Segundo apellido
+        var area = row[6]; // Área
+        var dateTime = row[7]; // Fecha y hora
 
-                    // Extraer solo la fecha (sin la hora)
-                    var date = dateTime.split(' ')[0];
-                    // Extraer la hora
-                    var time = dateTime.split(' ')[1];
+        // Extraer solo la fecha (sin la hora)
+        var date = dateTime.split(' ')[0];
+        // Extraer la hora
+        var time = dateTime.split(' ')[1];
 
-                    if (!userAreaDayCounts[date]) {
-                        userAreaDayCounts[date] = {};
-                    }
+        if (!userAreaDayCounts[date]) {
+            userAreaDayCounts[date] = {};
+        }
 
-                    if (!userAreaDayCounts[date][userId]) {
-                        userAreaDayCounts[date][userId] = {
-                            id: userId,
-                            name: name,
-                            lastName1: lastName1,
-                            lastName2: lastName2,
-                            areaCount: {}
-                        };
-                    }
+        if (!userAreaDayCounts[date][userId]) {
+            userAreaDayCounts[date][userId] = {
+                id: userId,
+                name: name,
+                lastName1: lastName1,
+                lastName2: lastName2,
+                areaCount: {},
+                entryTimes: [], // Almacenar las horas de entrada
+                exitTimes: []   // Almacenar las horas de salida
+            };
+        }
 
-                    if (!userAreaDayCounts[date][userId].areaCount[area]) {
-                        userAreaDayCounts[date][userId].areaCount[area] = { count: 0, time: [] }; // Cambiar a objeto para almacenar la hora
-                    }
+        if (!userAreaDayCounts[date][userId].areaCount[area]) {
+            userAreaDayCounts[date][userId].areaCount[area] = { count: 0, time: [] };
+        }
 
-                    // Incrementar el contador de ingresos por área en esa fecha
-                    userAreaDayCounts[date][userId].areaCount[area].count++;
-                    userAreaDayCounts[date][userId].areaCount[area].time.push(time); // Agregar la hora
-                });
+        // Incrementar el contador de ingresos por área en esa fecha
+        userAreaDayCounts[date][userId].areaCount[area].count++;
+        userAreaDayCounts[date][userId].areaCount[area].time.push(time); // Agregar la hora
 
-                // Generar PDF
-                const { jsPDF } = window.jspdf;
-                var doc = new jsPDF();
-                var leftsize = 20;
-                var width = 170;
-                var marginY = 10; // Margen vertical adicional para evitar superposición
+        // Almacenar la hora de entrada y salida
+        if (!userAreaDayCounts[date][userId].entryTimes.includes(time)) {
+            userAreaDayCounts[date][userId].entryTimes.push(time); // Guardar hora de entrada
+        }
+        userAreaDayCounts[date][userId].exitTimes.push(time); // Guardar hora de salida
+    });
 
-                // Agregar título
-                doc.setFontSize(16);
-                doc.text("Informe de Ingresos", leftsize, 10);
+    // Generar PDF
+    const { jsPDF } = window.jspdf;
+    var doc = new jsPDF();
+    var leftsize = 20;
+    var width = 170;
+    var marginY = 10; // Margen vertical adicional para evitar superposición
 
-                // Texto de introducción
-                var userNames = [];
-                filteredData.forEach(function (row) {
-                    var name = row[1]; // Nombre
-                    var lastName1 = row[2]; // Primer apellido
-                    var lastName2 = row[3]; // Segundo apellido
-                    userNames.push(`${name} ${lastName1} ${lastName2}`);
-                });
+    // Agregar título
+    doc.setFontSize(16);
+    doc.text("Informe de Ingresos", leftsize, 10);
 
-                // Crear una lista única de nombres
-                var uniqueNames = [...new Set(userNames)];
-                var namesList = uniqueNames.join(', ');
+    // Texto de introducción
+    var userNames = [];
+    filteredData.forEach(function (row) {
+        var name = row[1]; // Nombre
+        var lastName1 = row[2]; // Primer apellido
+        var lastName2 = row[3]; // Segundo apellido
+        userNames.push(`${name} ${lastName1} ${lastName2}`);
+    });
 
-                // Construir el texto de introducción
-                doc.setFontSize(12);
-                var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
-                var splitText = doc.splitTextToSize(introText, width);
-                
-                doc.text(splitText, leftsize, 30);
+    // Crear una lista única de nombres
+    var uniqueNames = [...new Set(userNames)];
+    var namesList = uniqueNames.join(', ');
 
-                // Agregar primera tabla al PDF con los datos de ingresos sin agrupar
-                var tableData = filteredData.map(function (row) {
-                    return [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]];
-                });
+    // Construir el texto de introducción
+    doc.setFontSize(12);
+    var introText = `Este es el registro de asistencia de los siguientes usuarios: ${namesList}. El informe presenta un resumen de los ingresos registrados, detallando la información de los usuarios, su rol, y el área de acceso.`;
+    var splitText = doc.splitTextToSize(introText, width);
+    
+    doc.text(splitText, leftsize, 30);
 
-                // Ordenar tableData por fecha y hora de ingreso (suponiendo que la fecha está en la posición 7)
-                tableData.sort(function (a, b) {
-                    var dateTimeA = new Date(a[7]); // Convertir a objeto Date
-                    var dateTimeB = new Date(b[7]); // Convertir a objeto Date
-                    return dateTimeA - dateTimeB; // Ordenar de menor a mayor
-                });
+    // Agregar primera tabla al PDF con los datos de ingresos sin agrupar
+    var tableData = [];
 
-                doc.autoTable({
-                    startY: 50,
-                    head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso']],
-                    body: tableData,
-                });
+    // Construir el array de tableData con entradas y salidas
+    for (const [date, users] of Object.entries(userAreaDayCounts)) {
+        for (const userId in users) {
+            const user = users[userId];
+            const exitTime = user.entryTimes[0] || ''; // La primera hora de entrada
+            const entryTime = user.exitTimes.slice(-1)[0] || ''; // La última hora registrada
+
+            // Obtener el área de acceso (puedes modificarlo si necesitas un formato diferente)
+            const area = Object.keys(user.areaCount).join(', ');
+
+            // Agregar los datos al array
+            tableData.push([userId, user.name, user.lastName1, user.lastName2, '', '', area, date, entryTime, exitTime]);
+        }
+    }
+
+    // Ordenar tableData por fecha
+    tableData.sort(function (a, b) {
+        var dateA = new Date(a[7]); // Convertir a objeto Date
+        var dateB = new Date(b[7]); // Convertir a objeto Date
+        return dateA - dateB; // Ordenar de menor a mayor
+    });
+
+    // Agregar tabla al PDF
+    doc.autoTable({
+        startY: 50,
+        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso', 'Hora de Entrada', 'Hora de Salida']],
+        body: tableData,
+    });
                 doc.addPage();
                 var finalY = 10;
                 doc.setFontSize(16);
