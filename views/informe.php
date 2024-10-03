@@ -411,19 +411,53 @@ $('#exportPDF').click(function () {
                     // Crear cuerpo de la tabla por día
                     var areaDayTableData = [];
                     var allHours = []; // Arreglo para almacenar todas las horas de un día específico
+                    var areasProcesadas = new Set(); // Conjunto para almacenar las áreas ya procesadas
 
+                    
                     for (var userId in userAreaDayCounts[date]) {
                         var user = userAreaDayCounts[date][userId];
+
+                        // Inicializamos el objeto si el usuario no tiene áreas procesadas todavía
+                        if (!areasProcesadas[userId]) {
+                            areasProcesadas[userId] = {};
+                        }
+
                         for (var area in user.areaCount) {
                             var areaData = user.areaCount[area];
-                            areaData.time.forEach(time => {
-                                areaDayTableData.push([
-                                    user.id, user.rut, user.name, user.lastName1, area, `${date} ${time}`, areaData.count, time // Agregar fecha y hora
-                                ]);
-                                
-                                // Almacenar las horas trabajadas para este usuario en el día
-                                allHours.push(time);
-                            });
+                            var horasPorDia = areaData.time; // Horas del día actual para este área
+
+                            // Verificar si el área ya fue procesada para este usuario
+                            if (areasProcesadas[userId][area]) {
+                                // Si ya existe el área para este usuario, agregar solo las nuevas horas
+                                horasPorDia.forEach(time => {
+                                    areasProcesadas[userId][area].horas.push(time);
+                                    allHours.push(time); // Guardar las horas trabajadas para cálculo de total
+                                });
+                            } else {
+                                // Si es la primera vez que se procesa el área para este usuario, crear la entrada
+                                areasProcesadas[userId][area] = {
+                                    rut: user.rut,
+                                    name: user.name,
+                                    lastName1: user.lastName1,
+                                    area: area,
+                                    date: date,
+                                    horas: [...horasPorDia], // Almacenar las horas
+                                    count: areaData.count // Cantidad de ingresos
+                                };
+
+                                // Almacenar las horas también en allHours
+                                horasPorDia.forEach(time => allHours.push(time));
+                            }
+                        }
+                    }
+
+                    // Convertir el objeto `areasProcesadas` en un arreglo para la tabla
+                    for (var userId in areasProcesadas) {
+                        for (var area in areasProcesadas[userId]) {
+                            var areaInfo = areasProcesadas[userId][area];
+                            areaDayTableData.push([
+                                userId, areaInfo.rut, areaInfo.name, areaInfo.lastName1, areaInfo.area, areaInfo.date, areaInfo.horas.join(", "), areaInfo.count
+                            ]);
                         }
                     }
 
@@ -441,7 +475,7 @@ $('#exportPDF').click(function () {
                     // Agregar la tabla para ese día
                     doc.autoTable({
                         startY: finalY + marginY, // Añadir margen vertical antes de la tabla
-                        head: [['Rut', 'Nombre', 'Apellido1', 'Área', 'Fecha de Ingreso', 'Cantidad de Ingresos', 'Horas']],
+                        head: [['Id Usuario', 'Rut', 'Nombre', 'Apellido1', 'Área', 'Fecha', 'Horas', 'Cantidad de Ingresos']],
                         body: areaDayTableData,
                     });
 
