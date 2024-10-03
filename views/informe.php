@@ -363,21 +363,23 @@ $('#exportPDF').click(function () {
             const area = Object.keys(user.areaCount).join(', ');
 
             // Agregar los datos al array
-            tableData.push([userId, user.name, user.lastName1, user.lastName2, user.rut, user.rol, area, date, entryTime, exitTime]);
+            tableData.push([userId, user.name, user.lastName1, user.rut, area, date, entryTime, exitTime]);
         }
     }
 
     // Ordenar tableData por fecha
     tableData.sort(function (a, b) {
-        var dateA = new Date(a[7]); // Convertir a objeto Date
-        var dateB = new Date(b[7]); // Convertir a objeto Date
+        var dateA = new Date(a[5]); // Convertir a objeto Date
+        var dateB = new Date(b[5]); // Convertir a objeto Date
         return dateA - dateB; // Ordenar de menor a mayor
     });
+
+    
 
     // Agregar tabla al PDF
     doc.autoTable({
         startY: 50,
-        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Apellido2', 'Rut', 'Rol', 'Área', 'Fecha de Ingreso', 'Hora de Entrada', 'Hora de Salida']],
+        head: [['ID Usuario', 'Nombre', 'Apellido1', 'Rut', 'Área', 'Fecha de Ingreso', 'Hora de Entrada', 'Hora de Salida']],
         body: tableData,
     });
                 doc.addPage();
@@ -473,45 +475,48 @@ $('#exportPDF').click(function () {
                     
 
                     // Inicializar variables para horas y minutos
-                    var horas, minutos;
+                var horas, minutos;
 
-                    // Verificar si totalfinal es negativo o positivo
-                    if (totalfinal >= 0) {
-                        // Para valores positivos
-                        horas = Math.floor(totalfinal);
-                        minutos = Math.round((totalfinal - horas) * 60);
-                    } else {
-                        // Para valores negativos
-                        horas = Math.ceil(totalfinal); // Usamos ceil para no bajar más allá de cero
-                        minutos = Math.round(Math.abs(totalfinal - horas) * 60);
-                    }
+                // Verificar si totalfinal es negativo o positivo
+                if (totalfinal >= 0) {
+                    // Para valores positivos
+                    horas = Math.floor(totalfinal);
+                    minutos = Math.round((totalfinal - horas) * 60);
+                } else {
+                    // Para valores negativos
+                    horas = Math.ceil(totalfinal); // Usamos ceil para no bajar más allá de cero
+                    minutos = Math.round(Math.abs(totalfinal - horas) * 60);
+                }
 
-                    // Aseguramos que los minutos siempre tengan dos dígitos
-                    var formatoMinutos = minutos < 10 ? "0" + minutos : minutos;
-
-                    // Formatear el resultado como h:m, incluyendo el signo negativo si es necesario
-                    var finalFormatoHora = (totalfinal < 0 ? "-" : "") + Math.abs(horas) + ":" + formatoMinutos;
-
-
-                    // Agregar datos a resumenTableData
-                    resumenTableData.push([user.rut, date, horasLaborales, totalTrabajadas, totalfinal, finalFormatoHora]);
+                // Aseguramos que los minutos siempre tengan dos dígitos
+                var formatoMinutos = minutos < 10 ? "0" + minutos : minutos;
+                // Formatear el resultado como h:m, incluyendo el signo negativo si es necesario
+                var finalFormatoHora = (totalfinal < 0 ? "-" : "") + Math.abs(horas) + ":" + formatoMinutos;
+                // Agregar datos a resumenTableData
+                resumenTableData.push([user.rut, date, horasLaborales, totalTrabajadas, totalfinal, finalFormatoHora]);
 
 
                 }
-                // Ordenar areaDayTableData por fecha y hora
-                resumenTableData.sort(function (a, b) {
-                    var dateTimeA = new Date(a[0]); // Convertir a objeto Date
-                    var dateTimeB = new Date(b[0]); // Convertir a objeto Date
-                    return dateTimeA - dateTimeB; // Ordenar de menor a mayor
-                });
-                
                 doc.addPage();
                 // Crear y agregar la tabla final
                 finalY = 10;
                 finalY += marginY; // Añadir margen antes de la nueva tabla
                 doc.setFontSize(16);
                 doc.text("Resumen de Horas Laborales", leftsize, finalY);
-                
+
+                // Inicializar variables para acumular los totales
+                var totalHorasLaborales = 0;
+                var totalHorasTrabajadas = 0;
+                var totalFinal = 0;
+
+                // Sumar los valores mientras se crea la tabla
+                resumenTableData.forEach(row => {
+                    totalHorasLaborales += row[2];  // Sumar Horas Laborales
+                    totalHorasTrabajadas += row[3];  // Sumar Horas Trabajadas
+                    totalFinal += row[4];  // Sumar Total
+                });
+
+                // Crear la tabla con los datos
                 doc.autoTable({
                     startY: finalY + marginY,
                     head: [['Rut','Fecha', 'Horas Laborales', 'Horas Trabajadas', 'Total', 'Total Horas']],
@@ -520,6 +525,14 @@ $('#exportPDF').click(function () {
 
                 // Asegurarse de que haya un margen después de la tabla antes de la conclusión
                 finalY = doc.lastAutoTable.finalY || finalY + marginY; 
+                finalY += marginY; // Añadir margen antes de la fila de totales
+
+                // Agregar fila de totales
+                doc.setFontSize(12);
+                doc.text("Total de Horas Trabajadas: " + totalHorasTrabajadas.toString() + "Hrs  //  " + totalFinal.toString() + "Hrs.", leftsize, finalY);
+
+                // Asegurarse de que haya un margen después de la tabla antes de la conclusión
+                finalY = finalY + marginY; 
                 finalY += marginY; // Añadir margen antes del texto de conclusión
 
                 // Agregar texto de conclusión
